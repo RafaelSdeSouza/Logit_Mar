@@ -14,7 +14,7 @@ D1$classification
 data$SFR_class<-D1$classification-1
 
 
-fit<-bayesglm(SFR_class~r_rvir,family=binomial,data=data)
+fit<-bayesglm(SFR_class~logMstar+logMhalo,family=binomial,data=data)
 
 library(popbio)
 logi.hist.plot(data$r_rvir,data$SFR_class,boxp=FALSE,type="hist",col="gray")
