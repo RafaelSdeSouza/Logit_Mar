@@ -26,15 +26,19 @@ data2$bpt <- revalue(data2$bpt,c("SF"="0","Composite"="0",
 
 x<-as.matrix(data2[,2:5])
 fit<-glmnet(x,y=data2$bpt,alpha=1,family="binomial")
-plot(fit,xvar="lambda")
+plot(fit,xvar="lambda",label = TRUE)
 plot(fit, xvar = "dev", label = TRUE)
 cv.glmmod <- cv.glmnet(x,y=data2$bpt,alpha=1,family="binomial",type.measure = "class")
 plot(cv.glmmod)
 best_lambda <- cv.glmmod$lambda.min
 
 coef.min = coef(cv.glmmod, s = "lambda.min")
-active.min = which(coef.min != 0)
+active.min = coef.min[which(coef.min != 0)]
 index.min = coef.min[active.min]
+
+
+
+
 
 fit<-gam(bpt~s(logMstar,3)+s(vlos_sigma,3),family=binomial,data=data2)
 
@@ -87,3 +91,109 @@ wireframe(z~x+y,data=data.frame(x=x, y=rep(y, each=length(x)), z=z),
 
 
 dev.off()
+
+
+
+
+
+market.size <- 800
+icecream$opportunity <- market.size - icecream$units
+bin.glm <- glm(cbind(units, opportunity) ~ temp, data=icecream, 
+               family=binomial(link = "logit"))
+par(mfrow=c(2,2))
+plot(bin.glm)
+title(outer=TRUE, line = -1,
+      main = list("Binomial (logit) GLM", 
+                  cex=1.25,col="black", font=2)) 
+
+meanProb <- predict(bin.glm, type="response")
+meanPred <- meanProb*market.size
+UpPred <- qbinom(.95, market.size, meanProb)
+LwPred <- qbinom(.05, market.size, meanProb)
+
+plotData <- lapply(
+  seq(along=icecream$temp),
+  function(i){
+    y = ylim[1]:ylim[2]
+    x = rep(icecream$temp[i], length(y))
+    z0 = rep(0, length(y))
+    z = dbinom(y, market.size, meanProb[i])
+    return(list(x=x, y=y, z0=z0, z=z))
+  }
+)
+
+
+
+icecream <- data.frame(
+  temp=c(11.9, 14.2, 15.2, 16.4, 17.2, 18.1, 
+         18.5, 19.4, 22.1, 22.6, 23.4, 25.1),
+  units=c(185L, 215L, 332L, 325L, 408L, 421L, 
+          406L, 412L, 522L, 445L, 544L, 614L)
+)
+glmModelPlot <- function(x, y, xlim,ylim, meanPred,  LwPred, UpPred, 
+                         plotData, main=NULL){
+  ## Based on code by Arthur Charpentier:
+  ## http://freakonometrics.hypotheses.org/9593
+  par(mfrow=c(1,1))
+  n <- 2
+  N <- length(meanPred)
+  zMax <- max(unlist(sapply(plotData, "[[", "z")))*1.5
+  mat <- persp(xlim, ylim, matrix(0, n, n), main=main,
+               zlim=c(0, zMax), theta=-30, 
+               ticktype="detailed",box=FALSE)
+  C <- trans3d(x, UpPred, rep(0, N),mat)
+  lines(C, lty=2)
+  C <- trans3d(x, LwPred, rep(0, N), mat)
+  lines(C, lty=2)
+  C <- trans3d(c(x, rev(x)), c(UpPred, rev(LwPred)),
+               rep(0, 2*N), mat)
+  polygon(C, border=NA, col=adjustcolor("yellow", alpha.f = 0.5))
+  C <- trans3d(x, meanPred, rep(0, N), mat)
+  lines(C, lwd=2, col="grey")
+  C <- trans3d(x, y, rep(0,N), mat)
+  points(C, lwd=2, col="#00526D")
+  for(j in N:1){
+    xp <- plotData[[j]]$x
+    yp <- plotData[[j]]$y
+    z0 <- plotData[[j]]$z0
+    zp <- plotData[[j]]$z
+    C <- trans3d(c(xp, xp), c(yp, rev(yp)), c(zp, z0), mat)
+    polygon(C, border=NA, col="light blue", density=40)
+    C <- trans3d(xp, yp, z0, mat)
+    lines(C, lty=2)
+    C <- trans3d(xp, yp, zp, mat)
+    lines(C, col=adjustcolor("blue", alpha.f = 0.5))
+  }
+}
+
+market.size <- 800
+icecream$opportunity <- market.size - icecream$units
+bin.glm <- glm(cbind(units, opportunity) ~ temp, data=icecream, 
+               family=binomial(link = "logit"))
+par(mfrow=c(2,2))
+plot(bin.glm)
+title(outer=TRUE, line = -1,
+      main = list("Binomial (logit) GLM", 
+                  cex=1.25,col="black", font=2)) 
+
+meanProb <- predict(bin.glm, type="response")
+meanPred <- meanProb*market.size
+UpPred <- qbinom(.95, market.size, meanProb)
+LwPred <- qbinom(.05, market.size, meanProb)
+
+plotData <- lapply(
+  seq(along=icecream$temp),
+  function(i){
+    y = ylim[1]:ylim[2]
+    x = rep(icecream$temp[i], length(y))
+    z0 = rep(0, length(y))
+    z = dbinom(y, market.size, meanProb[i])
+    return(list(x=x, y=y, z0=z0, z=z))
+  }
+)
+
+glmModelPlot(x = icecream$temp, y=icecream$units,
+             xlim=xlim, ylim=ylim,
+             meanPred = meanPred, LwPred = LwPred,
+             UpPred = UpPred, plotData = plotData,
+             main = "Binomial (logit) GLM")
