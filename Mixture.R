@@ -14,13 +14,17 @@ AGN_data$WHAN_Class<-revalue(AGN_data$WHAN_Class,c("2"="1","3"="1","1"="0","4"="
 #plot(D1, what = "density", data = sSFR, breaks = 25)
 #D1$classification
 
+<<<<<<< Updated upstream
 #data$SFR_class<-D1$classification-1
 
 
 fit<-bayesglm(SFR_class~logMstar+logMhalo,family=binomial,data=data)
+=======
+fit<-glm(SFR_class~logMstar+logMhalo,family=binomial,data=data)
+>>>>>>> Stashed changes
 
 library(popbio)
-logi.hist.plot(data$r_rvir,data$SFR_class,boxp=FALSE,type="hist",col="gray")
+logi.hist.plot(data$logMstar,data$SFR_class,boxp=FALSE,type="hist",col="gray")
 
 
 
@@ -53,16 +57,22 @@ YlOrBr <- c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404")
 #         expand = 0.5,shade = 0.1,
 #         xlab="Z", ylab=expression(NII.Ha), zlab=expression(log10.EW.Ha),ticktype='detailed',
 #         col = YlOrBr,border=NA,xlog=T,ylog=T)
-#cor = topo.colors(200)
+cor = cm.colors(200)
 
 cairo_pdf("logit3D.pdf")
 trellis.par.set("axis.line",list(axis.text=list(cex=20),col=NA,lty=1,lwd=2))
 par(mar=c(1,1,1,1))
-wireframe(z~x+y,data=data.frame(x=x, y=rep(y, each=length(x)), z=z),
+wireframe(z~x+y,data=data.frame(x=x, y=rep(y, each=length(x)), z=z), phi = 90, theta = 90,
           par.settings = list(regions=list(alpha=0.4)),
+<<<<<<< Updated upstream
           col.regions =cor,drape=T,light.source = c(5,5,5),colorkey = FALSE,
           xlab=list(label=expression(log10.NII.Ha.),cex=1.25), ylab=list(label=expression(log10.EW.Ha..),cex=1.25),
           zlab=list(rot=90,label=expression(pi),cex=1.25,dist=-1,rot=0),
+=======
+          col.regions =cor,drape=T,light.source = c(5,5,5),colorkey = F,
+          xlab=list(label=expression(M[star]),cex=1.25), ylab=list(label=expression(M[halo]),cex=1.25), 
+          zlab=list(rot=90,label=expression(pi),cex=1.25,dist=-1),
+>>>>>>> Stashed changes
           scale=list(tck=0.75,arrows=FALSE,distance =c(0.75, 0.75, 0.75)))
 
 
