@@ -1,0 +1,1 @@
+# JAGS Code with Adaptive Shrinkage
