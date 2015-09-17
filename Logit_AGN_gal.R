@@ -1,3 +1,4 @@
+# Libraries
 library(arm)
 library(caret)
 library(pROC)
@@ -15,19 +16,23 @@ data2$bpt <- revalue(data2$bpt,c("SF"="0","Composite"="0",
                                "Seyfert"="1","BLANK"="0"))
 
 
+# Scale variables
+data2$logMstar<-(data2$logMstar-mean(data2$logMstar))/sd(data2$logMstar)
+data2$logMhalo<-(data2$logMhalo-mean(data2$logMhalo))/sd(data2$logMhalo)
+data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
+data2$r_rvir<-(data2$r_rvir-mean(data2$r_rvir))/sd(data2$r_rvir)
 
-
-#sSFR<-data$sSFR
-#D1<-densityMclust(sSFR,G=2)
-#plot(D1, what = "density", data = sSFR, breaks = 25)
-#D1$classification
-
-#data$SFR_class<-D1$classification-1
+# Variable selection via LASSO
 
 x<-as.matrix(data2[,2:5])
 fit<-glmnet(x,y=data2$bpt,alpha=1,family="binomial")
+predict(fit, type="coefficients")
+
 plot(fit,xvar="lambda",label = TRUE)
 plot(fit, xvar = "dev", label = TRUE)
+
+# Cross-validation
+
 cv.glmmod <- cv.glmnet(x,y=data2$bpt,alpha=1,family="binomial",type.measure = "class")
 plot(cv.glmmod)
 best_lambda <- cv.glmmod$lambda.min
@@ -38,6 +43,14 @@ index.min = coef.min[active.min]
 
 
 
+# Fit and plot remained variables
+
+fit=glm(Y~Mvir+baryon_fraction,data=data.2,family=binomial("probit"))
+ROCtest(fit,10,"ROC")
+fit2=gam(Y~te(QHI,baryon_fraction),data=data.2,family=binomial("logit"))
+plot(fit2)
+vis.gam(fit2,type="response",plot.type = "persp",color="topo", border=NA, n.grid=500,theta=-60,phi=30)
+ROCtest(fit2,10,"ROC")
 
 
 fit<-gam(bpt~s(logMstar,3)+s(vlos_sigma,3),family=binomial,data=data2)
