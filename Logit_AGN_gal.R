@@ -5,6 +5,10 @@ library(pROC)
 require(plyr)
 require(gam)
 library(glmnet)
+require(mgcv)
+require(reshape2)
+require(ggthemes)
+require(Cairo)
 data<-read.csv("sample_agn.csv",header=TRUE,na.strings="")
 data2<-na.omit(data)
 data2<-data2[data2$logMstar>0,]
@@ -17,10 +21,10 @@ data2$bpt <- revalue(data2$bpt,c("SF"="0","Composite"="0",
 
 
 # Scale variables
-data2$logMstar<-(data2$logMstar-mean(data2$logMstar))/sd(data2$logMstar)
-data2$logMhalo<-(data2$logMhalo-mean(data2$logMhalo))/sd(data2$logMhalo)
-data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
-data2$r_rvir<-(data2$r_rvir-mean(data2$r_rvir))/sd(data2$r_rvir)
+#data2$logMstar<-(data2$logMstar-mean(data2$logMstar))/sd(data2$logMstar)
+#data2$logMhalo<-(data2$logMhalo-mean(data2$logMhalo))/sd(data2$logMhalo)
+#data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
+#data2$r_rvir<-(data2$r_rvir-mean(data2$r_rvir))/sd(data2$r_rvir)
 
 # Variable selection via LASSO
 
@@ -33,33 +37,25 @@ plot(fit, xvar = "dev", label = TRUE)
 
 # Cross-validation
 
-cv.glmmod <- cv.glmnet(x,y=data2$bpt,alpha=1,family="binomial",type.measure = "class")
+cv.glmmod <- cv.glmnet(x,y=data2$bpt,alpha=1,family="binomial",type.measure = "auc")
 plot(cv.glmmod)
 best_lambda <- cv.glmmod$lambda.min
 
 coef.min = coef(cv.glmmod, s = "lambda.min")
-active.min = coef.min[which(coef.min != 0)]
-index.min = coef.min[active.min]
+active.min = coef.min[which(abs(coef.min) > 0.05 )]
+
+
+
 
 
 
 # Fit and plot remained variables
 
-fit=glm(Y~Mvir+baryon_fraction,data=data.2,family=binomial("probit"))
-ROCtest(fit,10,"ROC")
-fit2=gam(Y~te(QHI,baryon_fraction),data=data.2,family=binomial("logit"))
-plot(fit2)
-vis.gam(fit2,type="response",plot.type = "persp",color="topo", border=NA, n.grid=500,theta=-60,phi=30)
-ROCtest(fit2,10,"ROC")
+fit=glm(bpt~logMstar+r_rvir,data=data2,family=binomial("logit"))
+fit2<-gam(bpt~s(logMstar,3)+s(vlos_sigma,3),family=binomial,data=data2)
 
 
-fit<-gam(bpt~s(logMstar,3)+s(vlos_sigma,3),family=binomial,data=data2)
-
-
-library(popbio)
-logi.hist.plot(data2$logMstar,data2$bpt,boxp=FALSE,type="hist",col="gray")
-
-
+# Diagnostic 
 
 ROCF<- data.frame(True=data2$bpt,predicted=predict(fit,type = "response"))
 F1 <-roc(ROCF$True,ROCF$predicted)
@@ -73,140 +69,89 @@ plot(F1)
 confusionMatrix(ROCF$True, ROCF$class)
 
 
-
+# Plot 
 
 x <-range(data2$logMstar)
-x <- seq(0.5*x[1], 1.5*x[2], length.out=50)
-y <- range(data2$vlos_sigma)
-y <- seq(0.5*y[1], 1.5*y[2], length.out=50)
+x <- seq(0.95*x[1], 1.25*x[2], length.out=50)
+y <- range(data2$r_rvir)
+y <- seq(y[1], 1.25*y[2], length.out=50)
 
 z <- outer(x,y,
-           function(logMstar,vlos_sigma)
-             predict(fit, data.frame(logMstar,vlos_sigma),type = 'response'))
+           function(logMstar,r_rvir)
+             predict(fit, data.frame(logMstar,r_rvir),type = 'response'))
 library(rsm)
 library(lattice)
-YlOrBr <- c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404")
+YlOrBr <- c("#00A3DB")
 #p<-persp(x,y,z, theta=150, phi=20,
 #         expand = 0.5,shade = 0.1,
 #         xlab="Z", ylab=expression(NII.Ha), zlab=expression(log10.EW.Ha),ticktype='detailed',
 #         col = YlOrBr,border=NA,xlog=T,ylog=T)
-cor = cm.colors(100)
-
-cairo_pdf("logit3D_2.pdf")
+cairo_pdf("logit3D.pdf")
 trellis.par.set("axis.line",list(axis.text=list(cex=20),col=NA,lty=1,lwd=2))
 par(mar=c(1,1,1,1))
 wireframe(z~x+y,data=data.frame(x=x, y=rep(y, each=length(x)), z=z),
           par.settings = list(regions=list(alpha=0.6)),
-          col.regions =cor,drape=T,light.source = c(5,5,5),colorkey = FALSE,
-          xlab=list(label=expression(log[Mstar]),cex=1.25), ylab=list(label=expression(V[sigma]),cex=1.25),
-          zlab=list(rot=90,label=expression(pi),cex=1.25,dist=-1,rot=0),
+          col.regions =YlOrBr,drape=T,light.source = c(5,5,5),colorkey = FALSE,
+          xlab=list(label=expression(log~M[star]/M['\u0298']),cex=1.25),
+          ylab=list(label=expression(R[vir](R['\u0298'])),cex=1.25),
+          zlab=list(rot=90,label=expression(P[AGN]),cex=1.25,dist=-1,rot=0),
           scale=list(tck=0.75,arrows=FALSE,distance =c(0.75, 0.75, 0.75)))
-
 
 dev.off()
 
 
-
-
-
-market.size <- 800
-icecream$opportunity <- market.size - icecream$units
-bin.glm <- glm(cbind(units, opportunity) ~ temp, data=icecream, 
-               family=binomial(link = "logit"))
-par(mfrow=c(2,2))
-plot(bin.glm)
-title(outer=TRUE, line = -1,
-      main = list("Binomial (logit) GLM", 
-                  cex=1.25,col="black", font=2)) 
-
-meanProb <- predict(bin.glm, type="response")
-meanPred <- meanProb*market.size
-UpPred <- qbinom(.95, market.size, meanProb)
-LwPred <- qbinom(.05, market.size, meanProb)
-
-plotData <- lapply(
-  seq(along=icecream$temp),
-  function(i){
-    y = ylim[1]:ylim[2]
-    x = rep(icecream$temp[i], length(y))
-    z0 = rep(0, length(y))
-    z = dbinom(y, market.size, meanProb[i])
-    return(list(x=x, y=y, z0=z0, z=z))
+g.dat<-melt(data2,id="bpt")
+mf_labeller <- function(var, value){
+  value <- as.character(value)
+  if (var=="sex") { 
+    value[value=="Female"] <- "Woman"
+    value[value=="Male"]   <- "Man"
   }
-)
+  return(value)
+}
+g.dat$bpt<-as.factor(g.dat$bpt)
+g.dat$bpt<-revalue(g.dat$bpt,c("0"="No AGN","1"="AGN"))
 
 
-
-icecream <- data.frame(
-  temp=c(11.9, 14.2, 15.2, 16.4, 17.2, 18.1, 
-         18.5, 19.4, 22.1, 22.6, 23.4, 25.1),
-  units=c(185L, 215L, 332L, 325L, 408L, 421L, 
-          406L, 412L, 522L, 445L, 544L, 614L)
-)
-glmModelPlot <- function(x, y, xlim,ylim, meanPred,  LwPred, UpPred, 
-                         plotData, main=NULL){
-  ## Based on code by Arthur Charpentier:
-  ## http://freakonometrics.hypotheses.org/9593
-  par(mfrow=c(1,1))
-  n <- 2
-  N <- length(meanPred)
-  zMax <- max(unlist(sapply(plotData, "[[", "z")))*1.5
-  mat <- persp(xlim, ylim, matrix(0, n, n), main=main,
-               zlim=c(0, zMax), theta=-30, 
-               ticktype="detailed",box=FALSE)
-  C <- trans3d(x, UpPred, rep(0, N),mat)
-  lines(C, lty=2)
-  C <- trans3d(x, LwPred, rep(0, N), mat)
-  lines(C, lty=2)
-  C <- trans3d(c(x, rev(x)), c(UpPred, rev(LwPred)),
-               rep(0, 2*N), mat)
-  polygon(C, border=NA, col=adjustcolor("yellow", alpha.f = 0.5))
-  C <- trans3d(x, meanPred, rep(0, N), mat)
-  lines(C, lwd=2, col="grey")
-  C <- trans3d(x, y, rep(0,N), mat)
-  points(C, lwd=2, col="#00526D")
-  for(j in N:1){
-    xp <- plotData[[j]]$x
-    yp <- plotData[[j]]$y
-    z0 <- plotData[[j]]$z0
-    zp <- plotData[[j]]$z
-    C <- trans3d(c(xp, xp), c(yp, rev(yp)), c(zp, z0), mat)
-    polygon(C, border=NA, col="light blue", density=40)
-    C <- trans3d(xp, yp, z0, mat)
-    lines(C, lty=2)
-    C <- trans3d(xp, yp, zp, mat)
-    lines(C, col=adjustcolor("blue", alpha.f = 0.5))
+facet_wrap_labeller <- function(gg.plot,labels=NULL) {
+  #works with R 3.0.1 and ggplot2 0.9.3.1
+  require(gridExtra)
+  
+  g <- ggplotGrob(gg.plot)
+  gg <- g$grobs      
+  strips <- grep("strip_t", names(gg))
+  
+  for(ii in seq_along(labels))  {
+    modgrob <- getGrob(gg[[strips[ii]]], "strip.text", 
+                       grep=TRUE, global=TRUE)
+    gg[[strips[ii]]]$children[[modgrob$name]] <- editGrob(modgrob,label=labels[ii])
   }
+  
+  g$grobs <- gg
+  class(g) = c("arrange", "ggplot",class(g)) 
+  g
+}
+give.n <- function(x){
+  
+  return(c(y = 0.5, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
 }
 
-market.size <- 800
-icecream$opportunity <- market.size - icecream$units
-bin.glm <- glm(cbind(units, opportunity) ~ temp, data=icecream, 
-               family=binomial(link = "logit"))
-par(mfrow=c(2,2))
-plot(bin.glm)
-title(outer=TRUE, line = -1,
-      main = list("Binomial (logit) GLM", 
-                  cex=1.25,col="black", font=2)) 
 
-meanProb <- predict(bin.glm, type="response")
-meanPred <- meanProb*market.size
-UpPred <- qbinom(.95, market.size, meanProb)
-LwPred <- qbinom(.05, market.size, meanProb)
 
-plotData <- lapply(
-  seq(along=icecream$temp),
-  function(i){
-    y = ylim[1]:ylim[2]
-    x = rep(icecream$temp[i], length(y))
-    z0 = rep(0, length(y))
-    z = dbinom(y, market.size, meanProb[i])
-    return(list(x=x, y=y, z0=z0, z=z))
-  }
-)
 
-glmModelPlot(x = icecream$temp, y=icecream$units,
-             xlim=xlim, ylim=ylim,
-             meanPred = meanPred, LwPred = LwPred,
-             UpPred = UpPred, plotData = plotData,
-             main = "Binomial (logit) GLM")
+g1<-ggplot(aes(y=value,x=bpt),data=g.dat)+geom_boxplot(aes(fill=bpt))+
+  facet_wrap(~variable,ncol=2,scales="free")+theme_hc()+
+  scale_fill_economist()+ylab("")+xlab("")+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=20),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))
+g2<-facet_wrap_labeller(g1,labels=c(expression(log~M[star]/M['\u0298']),expression(log~M[h]/M['\u0298']),
+                                    expression(sigma~(km/s)),expression(R[vir](R['\u0298']))))
+
+CairoPDF("box.pdf",width = 9,height = 8)
+g2
+dev.off()
