@@ -18,25 +18,29 @@ require(plyr)
 
 
 # Read and format data
-data<-read.csv("sample_agn.csv",header=TRUE,na.strings="")
+data<-read.csv("..//data/Logit_sample-2.csv",header=TRUE,na.strings="")
 data2<-na.omit(data)
-data2<-data2[data2$logMstar>0,]
-data2<-data2[which(data2$vlos_sigma!=Inf),]
+data2<-data2[data2$logMstar_p50>0,]
+data2<-data2[which(data2$sigma>0),]
+data2<-data2[which(data2$rvir>0),]
+
+trainIndex <- sample(1:nrow(data2),10000)
+data3<-data2[trainIndex,]
 
 #data2$bpt<-as.factor(data2$bpt)
-data2$bpt <- revalue(data2$bpt,c("SF"="0","Composite"="0",
-                                 "LINER"="1","Seyfert/LINER"="1",
+data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0","Composi"="0",
+                                 "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
                                  "Seyfert"="1","BLANK"="0"))
 
 
 # Prepare data for JAGS
-data2$logMstar<-(data2$logMstar-mean(data2$logMstar))/sd(data2$logMstar)
-data2$logMhalo<-(data2$logMhalo-mean(data2$logMhalo))/sd(data2$logMhalo)
-data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
-data2$r_rvir<-(data2$r_rvir-mean(data2$r_rvir))/sd(data2$r_rvir)
+#data2$logMstar<-(data2$logMstar-mean(data2$logMstar))/sd(data2$logMstar)
+#data2$logMhalo<-(data2$logMhalo-mean(data2$logMhalo))/sd(data2$logMhalo)
+#data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
+#data2$r_rvir<-(data2$r_rvir-mean(data2$r_rvir))/sd(data2$r_rvir)
 
 
-X<-model.matrix(~logMstar+logMhalo+vlos_sigma+r_rvir,data=data2)
+X<-model.matrix(~logMstar_p50+logMhalo+vlos_sigma+r_rvir,data=data3)
 K<-ncol(X)
 
 jags.data <- list(Y= data2$bpt,
@@ -47,13 +51,13 @@ jags.data <- list(Y= data2$bpt,
                   Npred = K
 )
 model<-"model{
-#1. Priors 
+#1. Priors
 #beta~dmnorm(b0[],B0[,]) # Normal Priors
-# Jefreys priors for sparseness 
+# Jefreys priors for sparseness
 for(j in 1:Npred)   {
-lnTau[j] ~ dunif(-50, 50)   
+lnTau[j] ~ dunif(-50, 50)
 TauM[j] <- exp(lnTau[j])
-beta[j] ~ dnorm(0, TauM[j]) 
+beta[j] ~ dnorm(0, TauM[j])
 Ind[j] <- step(abs(beta[j]) - 0.05)
 }
 
@@ -84,8 +88,8 @@ inits3=inits0()
 
 library(parallel)
 cl <- makeCluster(3)
-jags.logit <- run.jags(method="rjparallel", 
-                       data = jags.data, 
+jags.logit <- run.jags(method="rjparallel",
+                       data = jags.data,
                        inits = list(inits1,inits2,inits3),
                        model=model,
                        n.chains = 3,
