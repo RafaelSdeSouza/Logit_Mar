@@ -24,7 +24,7 @@ data2<-data2[data2$logMstar_p50>0,]
 data2<-data2[which(data2$sigma>0),]
 data2<-data2[which(data2$rvir>0),]
 
-trainIndex <- sample(1:nrow(data2),10000)
+trainIndex <- sample(1:nrow(data2),5000)
 data3<-data2[trainIndex,]
 
 #data2$bpt<-as.factor(data2$bpt)
@@ -32,22 +32,22 @@ data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0","Composi"="0
                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
                                  "Seyfert"="1","BLANK"="0"))
 
-
+data3$R_rvir = data3$Rproj_L/data3$rvir
 # Prepare data for JAGS
-#data2$logMstar<-(data2$logMstar-mean(data2$logMstar))/sd(data2$logMstar)
-#data2$logMhalo<-(data2$logMhalo-mean(data2$logMhalo))/sd(data2$logMhalo)
+data3$logMstar_p50<-(data3$logMstar_p50-mean(data3$logMstar_p50))/sd(data3$logMstar_p50)
+data3$logMhalo<-(data3$logMhalo-mean(data3$logMhalo))/sd(data3$logMhalo)
 #data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
-#data2$r_rvir<-(data2$r_rvir-mean(data2$r_rvir))/sd(data2$r_rvir)
+data3$R_rvir<-(data3$R_rvir-mean(data3$R_rvir))/sd(data3$R_rvir)
 
 
-X<-model.matrix(~logMstar_p50+logMhalo+vlos_sigma+r_rvir,data=data3)
+X<-model.matrix(~logMstar_p50+logMhalo+R_rvir,data=data3)
 K<-ncol(X)
 
-jags.data <- list(Y= data2$bpt,
-                  N = nrow(data2),
+jags.data <- list(Y= as.numeric(data3$bpt)-1,
+                  N = nrow(data3),
                   X=X,
-                  b0 = rep(0,K),
-                  B0=diag(1e-4,K),
+#                  b0 = rep(0,K),
+#                  B0=diag(1e-4,K),
                   Npred = K
 )
 model<-"model{
@@ -78,7 +78,7 @@ NewPred[i]~dbern(pi[i])
 params <- c("beta","pi","Ind","NewPred")
 
 inits0  <- function () {
-  list(beta = rnorm(K, 0, 0.1))}
+  list(beta = rnorm(K, 0, 0.01))}
 
 
 
@@ -103,5 +103,32 @@ jags.logit <- run.jags(method="rjparallel",
 
 jagssamples <- as.mcmc.list(jags.logit)
 
+G1<-ggs(jagssamples)
+ggs_density(G1)+theme_few()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  scale_colour_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))+
+  scale_fill_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))
+
+# Plot fit 
+
+P1<-ggplot(aes(x=x,y=y),data=Msigma2)+geom_point()+
+  theme_few()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  scale_colour_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))+
+  scale_fill_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))
+
+
+s<-summary(posterior.normal)
+capture.output(s, file = "myfile.txt")
 
 
