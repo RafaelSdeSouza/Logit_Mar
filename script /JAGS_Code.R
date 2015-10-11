@@ -24,7 +24,7 @@ data2<-data2[data2$logMstar_p50>0,]
 data2<-data2[which(data2$sigma>0),]
 data2<-data2[which(data2$rvir>0),]
 
-trainIndex <- sample(1:nrow(data2),5000)
+trainIndex <- sample(1:nrow(data2),1000)
 data3<-data2[trainIndex,]
 
 #data2$bpt<-as.factor(data2$bpt)
@@ -103,8 +103,8 @@ jags.logit <- run.jags(method="rjparallel",
 
 jagssamples <- as.mcmc.list(jags.logit)
 
-G1<-ggs(jagssamples)
-ggs_density(G1)+theme_few()+
+G1<-ggs(jagssamples,family="beta")
+ggs_caterpillar(G1)+theme_few()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=18),
@@ -113,22 +113,33 @@ ggs_density(G1)+theme_few()+
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
   scale_colour_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))+
   scale_fill_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))
+
+
+
+pi_AGN<-summary(as.mcmc.list(jags.logit, vars="pi"))
+pi_AGN<-pi_AGN$quantiles
+
+gdata<-data.frame(x=data3$logMstar_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
+
+
 
 # Plot fit 
 
-P1<-ggplot(aes(x=x,y=y),data=Msigma2)+geom_point()+
-  theme_few()+
+P1<-ggplot(aes(x=x,y=mean),data=gdata)+geom_line()+
+  geom_ribbon(data=gdata,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.45, fill=c("#005502")) +
+  geom_ribbon(data=gdata,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.35, fill=c("#3A5F0B")) +
+  theme_hc()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=18),
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  scale_colour_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))+
-  scale_fill_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))
+  xlab(expression(log~M[star]))+ylab(expression(P[AGN]))
 
+cairo_pdf("logit_AGN.pdf",width = 8, height = 7)
+P1
+dev.off()
 
-s<-summary(posterior.normal)
-capture.output(s, file = "myfile.txt")
 
 
