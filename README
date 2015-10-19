@@ -1,0 +1,158 @@
+##################################
+# Table sample_CRP02_sub.csv
+##################################
+
+------------------------------------------------------------------------------------
+- Description of group/cluster sample:
+------------------------------------------------------------------------------------
+  --> Group selection criteria:
+        N_gals >= 10;
+        at 0.015 < z < 0.1;
+        with 13.4 < log Mvir < 14.6
+
+  --> Galaxy selection criteria
+        Mabs_Petro <= -20.39 (completeness limit)
+
+------------------------------------------------------------------------------------
+- Columns:
+------------------------------------------------------------------------------------
+	objID			- SDSS-DR12 objID
+
+	specObjID		- SDSS-DR12 specObjID
+
+	ra		        - RA (degrees)
+
+	dec			- DEC (degrees)
+
+	magPetro_g		- Petrosian magnitude in g band, extinction corrected 
+
+	magPetro_r		- Petrosian magnitude in r band, extinction corrected 
+
+	magPetro_i		- Petrosian magnitude in i band, extinction corrected 
+
+	z			- Galaxy redshift
+
+	zErr			- Galaxy redshift error
+
+	bpt			- Galaxy classification based on BPT diagram
+
+	lgm_tot_p50		- Stellar mass (MPA-JHU, Brinchmann et al. 2004)
+
+	lgm_tot_p16  		- The 16th percentile of the Log total stellar mass PDF using model photometry
+
+	lgm_tot_p84  		- The 84th percentile of the Log total stellar mass PDF using model photometry
+
+	sfr_tot_p50		- Star formation rate (MPA-JHU, Brinchmann et al. 2004)
+
+	sfr_tot_p16  		- The 16th percentile of the SFR PDF
+
+	sfr_tot_p84  		- The 84th percentile of the SFR PDF
+
+	specsfr_tot_p50		- Specific star formation rate (MPA-JHU, Brinchmann et al. 2004)
+
+	specsfr_tot_p16		- The 16th percentile of the sSFR PDF
+
+	specsfr_tot_p84		- The 16th percentile of the sSFR PDF
+
+	petroRad_r		- Petrosian radius in r band (arcsec)
+
+	mu_petro_r 		- Petrosian surface brightness in r band
+				    mu_petro_r = (magPetro_r - kcorr075_r + 2.5*log10(2 * pi * petroRad_r^2) - 10 * log10(1 + z))
+	eClass			- SDSS eClass parameter
+
+	logMass_MILES		- log(stellar mass) obtained using the STARLIGHT code with MILES models
+
+	ageM_MILES		- Mass-weighted age obtained using the STARLIGHT code with MILES models (Gyr)
+
+	metM_MILES		- Mass-weighted metallicity obtained using the STARLIGHT code with MILES models
+
+	ageL_MILES              - Luminosity-weighted age obtained using the STARLIGHT code with MILES models (Gyr)
+
+	metL_MILES		- Luminosity-weighted metallicity obtained using the STARLIGHT code with MILES models
+
+	sigma_MILES		- Velocity dispersion obtained using the STARLIGHT code with MILES models (km/s)
+
+	av_MILES		- Internal extinction Av obtained using the STARLIGHT code with MILES models 
+
+	logMass_BC03		- log(stellar mass) obtained using the STARLIGHT code with BC03 models
+
+	ageM_BC03		- Mass-weighted age obtained using the STARLIGHT code with BC03 models (Gyr)
+
+	metM_BC03		- Mass-weighted metallicity obtained using the STARLIGHT code with BC03 models
+
+	ageL_BC03               - Luminosity-weighted age obtained using the STARLIGHT code with BC03 models (Gyr)
+
+	metL_BC03		- Luminosity-weighted metallicity obtained using the STARLIGHT code with BC03 models
+
+	sigma_BC03		- Velocity dispersion obtained using the STARLIGHT code with BC03 models (km/s)
+
+	av_MILES		- Internal extinction Av obtained using the STARLIGHT code with BC03 models 
+
+	sn_SDSS			- Median signal-to-noise over all good pixels in r-band (retrieved from SDSS database)
+
+	color_gr		- g-r color (Petrosian, k-corrected)
+
+	color_gi		- g-i color (Petrosian, k-corrected)
+
+	absPetro_g		- Petrosian absolute magnitude in g band (extinction and k-corrected)
+
+	absPetro_r		- Petrosian absolute magnitude in r band (extinction and k-corrected)
+
+	absPetro_i		- Petrosian absolute magnitude in i band (extinction and k-corrected)
+
+	igal			- Galaxy ID (Yang et al. catalogue)
+
+	groupID			- Group ID (Yang et al. catalogue)
+
+	Rproj_LW		- projected distance (kpc) of galaxy from luminosity weighted group center
+
+	Rproj_L			- projected distance (kpc) of galaxy from the brightest group galaxy
+
+	Rproj_M			- projected distance (kpc) of galaxy from the most massive group galaxy
+
+	groupRA			- Group RA (degrees)
+
+	groupDEC		- Group DEC (degrees)
+
+	groupZ			- Group redshift
+
+	Ngals			- Number of galaxy members
+
+	logM200_L		- Group virial mass
+
+	logM200_low_L		- Group virial mass error (lower value)
+
+	logM200_up_L		- Group virial mass error (upper value)
+
+	R200_L			- Group virial radius
+
+	R200_low_L		- Group virial radius error (lower value)
+
+	R200_up_L		- Group virial radius error (upper value)
+
+	sigma_L			- Group velocity dispersion (km/s)
+
+	sigma_low_L		- Group velocity dispersion error (lower value)
+
+	sigma_up_L		- Group velocity dispersion error (upper value)
+
+	Ngals200_L		- Number of galaxies within R200_L 
+
+	Ngals200_low_L		- Number of galaxies within R200_L error (lower value)
+
+	Ngals200_up_L		- Number of galaxies within R200_L error (upper value)
+
+	assign			- Density constrast calculated during assignment procedure 
+				     (-1 means that galaxy is a group member in Yang et al. catalogue)
+	zoo			- Galaxy Zoo 1 classification (E - elliptical; S - spiral; U - undefined)
+
+	vlos_sigma		- Line of sight velocity relative to group velocity dispersion
+
+	RprojL_Rvir		- projected distance of galaxy from the brightest group galaxy, normalized by Rvir
+
+	RprojLW_Rvir		- projected distance of galaxy from luminosity weighted group center, normalized by Rvir
+
+	RprojM_Rvir		- projected distance of galaxy from most massive group galaxy, normalized by Rvir
+
+
+
