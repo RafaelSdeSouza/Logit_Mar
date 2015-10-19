@@ -1,0 +1,42 @@
+* Highlight, page 1
+The fraction of star-forming galaxies which host a powerful optical AGN is also independent of clustercentric radius, indicating that the link between star formation and AGN in these galaxies operates independent of environment.
+
+* Highlight, page 1
+The fraction of red galaxies which host a weak optical AGN decreases, however, towards the cluster center, with a similar timescale as the decline of star forming galaxies.
+
+* Highlight, page 1
+This suggests that star formation rate couples most strongly to environment, with morphology being only a secondary correlation.
+
+* Highlight, page 1
+In the field, star formation and morphology are not inde- pendent of each other: low star formation rate is correlated with early-type morphology (i.e. elliptical and S0 galaxies), whereas high star formation activity is typical of late-type morphology (disk galaxies).
+
+* Highlight, page 2
+However, encounters between galaxies which do not lead to merg- ing can still affect galaxy properties via tidal forces which heat the stellar disk (harassment Moore et al. 1998).
+
+* Highlight, page 3
+A different viewing angle to the galaxy population mix is the oc- currence of Active Galactic Nuclei (AGN). The details of the link between AGN activity and the properties of the host galaxy, par- ticularly its star formation history, are still a matter of debate.
+
+* Underline, page 3
+But the mere existence of the linear correlation between the mass of the central black hole and the mass of the bulge (e.g. Magorrian et al. 1998) is a strong indication that the formation of the two must be closely linked (e.g. Cattaneo et al. 1999; Heckman et al. 2004).
+
+* Underline, page 3
+Powerful optical AGN trace current star formation activity, as they are found predominantly in galaxies with massive, but young, bulges (Kauffmann et al. 2003).
+
+* Underline, page 3
+Weak optical AGN and radio-selected AGN, on the other hand, are found predominantly in massive galaxies with old stellar populations (Kauffmann et al. 2003; Best et al. 2005).
+
+* Highlight, page 3
+A prerequisite for AGN activity is a mechanism to transport gas to the central black hole. In disk galaxies, this may take place via major or minor mergers, or disk instabilities. Increased AGN activity in cluster galaxies could thus trace the effect of mergers, but possibly also harassment, which also calls for disturbance of the disk.
+
+* Underline, page 13
+geneous population. It is therefore plausible (and indeed expected, see De Lucia & Blaizot 2007) that the mean age of the red galaxies increases towards the cluster center, and provides less fuel for the central black hole.
+
+* Highlight, page 13
+While the more powerful Seyferts are found almost exclusively in star-forming galaxies, the weaker LINERs are found predominantly in galaxies with old stellar populations (Kauffmann et al. 2003).
+
+* Highlight, page 13
+The star formation rate in our red galaxies is quite low (Fig. 9), so that AGN can be identified to much lower luminosities without contamination from star formation emission lines. Fig. 12 shows that the fraction of optical AGN in red galaxies declines towards the cluster center, by approximately a factor of two between the field and the center. The decline is gradual, and consistent with set- ting in around R200.
+
+* Underline, page 13
+The relation between these weak AGN and their host galaxy properties is very different from the more powerful optical AGN. Kauffmann & Heckman (2009) showed that for these systems, the rate of accretion onto the black hole is proportional to the bulge mass, with a constant of proportionality that depends on the age of the bulge stellar population. A likely explanation for this re- sult is that the AGN is fuelled by mass loss from evolved stars. Dn(4000) and PC1 are largely insensitive to stellar populations of 2 Gyr, and thus our class of red galaxies is far from a homo-
+

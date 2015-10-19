@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AllowsCopying</key>
+	<true/>
+	<key>AllowsPrinting</key>
+	<true/>
+	<key>CreationDate</key>
+	<date>2009-09-18T20:32:22Z</date>
+	<key>Creator</key>
+	<string>LaTeX with hyperref package</string>
+	<key>Encrypted</key>
+	<false/>
+	<key>FileName</key>
+	<string>0909.3522v1.pdfd</string>
+	<key>FileSize</key>
+	<string>3.3 MB (3.459.006 bytes)</string>
+	<key>LogicalSize</key>
+	<integer>3459006</integer>
+	<key>ModDate</key>
+	<date>2009-09-18T20:32:22Z</date>
+	<key>PageCount</key>
+	<integer>16</integer>
+	<key>PageHeight</key>
+	<real>792</real>
+	<key>PageSize</key>
+	<string>21.6 x 27.9 cm</string>
+	<key>PageWidth</key>
+	<real>612</real>
+	<key>PhysicalSize</key>
+	<integer>3477504</integer>
+	<key>Producer</key>
+	<string>dvips + GPL Ghostscript SVN PRE-RELEASE 8.71</string>
+	<key>Rating</key>
+	<real>0.0</real>
+	<key>Tags</key>
+	<array/>
+	<key>Version</key>
+	<string>1.4</string>
+</dict>
+</plist>
