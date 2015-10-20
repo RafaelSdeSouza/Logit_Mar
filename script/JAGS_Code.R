@@ -18,7 +18,7 @@ require(plyr)
 
 
 # Read and format data
-data<-read.csv("..//data/Logit_sample-2.csv",header=TRUE,na.strings="")
+data<-read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
 data2<-na.omit(data)
 data2<-data2[data2$logMstar_p50>0,]
 data2<-data2[which(data2$sigma>0),]
