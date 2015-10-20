@@ -19,7 +19,12 @@ require(plyr)
 
 # Read and format data
 data<-read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
+data$tempbar<-data$t03_bar_a06_bar_flag*2+data$t03_bar_a07_no_bar_flag
+#data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo","tempbar")]
 data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo")]
+data_cut<-data_cut[which(tempbar==1 |tempbar==2),]
+
+
 
 data2<-na.omit(data_cut)
 data2<-data2[data2$lgm_tot_p50>0,]
@@ -27,18 +32,27 @@ data2<-data2[which(data2$logM200_L>0),]
 data2<-data2[which(data2$RprojLW_Rvir>0),]
 data2<-data2[which(data2$sfr_tot_p50>0),]
 
-trainIndex <- sample(1:nrow(data2),400)
-data3<-data2[trainIndex,]
+# bar 
+
+
+#
+
+
+#trainIndex <- sample(1:nrow(data2),400)
+#data3<-data2[trainIndex,]
 
 #data2$bpt<-as.factor(data2$bpt)
 data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
                                  "Seyfert"="1","BLANK"="0"))
 
+
+
+
 # Standardized variables
 
-data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),data3$zoo)
-
+data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),zoo=data3$zoo)
+data_n<-data_n[which(data_n$zoo=="S" | data_n$zoo=="E"),]
 
 
 #data3$R_rvir = data3$Rproj_L/data3$rvir
