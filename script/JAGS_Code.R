@@ -48,15 +48,22 @@ data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),data3$zoo)
 #data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
 #data3$R_rvir<-(data3$R_rvir-mean(data3$R_rvir))/sd(data3$R_rvir)
 
+galtype<-match(data3$zoo,c("E", "S","U"))
+Ntype<-length(unique(data3$zoo))
+
 
 X<-model.matrix(~lgm_tot_p50+logM200_L+RprojLW_Rvir+sfr_tot_p50,data=data_n)
 K<-ncol(X)
+
 
 jags.data <- list(Y= as.numeric(data3$bpt)-1,
                   N = nrow(data_n),
                   X=X,
                   b0 = rep(0,K),
-                  B0=diag(1e-4,K)
+                  B0=diag(1e-4,K),
+                  galtype = galtype,
+                  #                 bar=bar,
+                  Ntype=Ntype
 #                  Npred = K
 )
 model<-"model{
@@ -70,12 +77,18 @@ beta~dmnorm(b0[],B0[,]) # Normal Priors
 #Ind[j] <- step(abs(beta[j]) - 0.05)
 #}
 
+# Random intercept 
+for (j in 1:Ntype){
+ranef[j]~dnorm(0,0.001)
+}
+
+
 #2. Likelihood
 
 for(i in 1:N){
 Y[i] ~ dbern(pi[i])
 logit(pi[i]) <-  eta[i]
-eta[i] <- inprod(beta[], X[i,])
+eta[i] <- inprod(beta[], X[i,])+ranef[galtype[i]]
 
 
 #3. Prediction
@@ -84,7 +97,8 @@ NewPred[i]~dbern(pi[i])
 
 }"
 
-params <- c("beta","pi","Ind","NewPred")
+params <- c("beta","ranef")
+#params <- c("beta","pi","Ind","NewPred")
 
 inits0  <- function () {
   list(beta = rnorm(K, 0, 0.01))}
