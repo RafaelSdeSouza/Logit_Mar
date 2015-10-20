@@ -19,47 +19,56 @@ require(plyr)
 
 # Read and format data
 data<-read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
-data2<-na.omit(data)
-data2<-data2[data2$logMstar_p50>0,]
-data2<-data2[which(data2$sigma>0),]
-data2<-data2[which(data2$rvir>0),]
+data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo")]
 
-trainIndex <- sample(1:nrow(data2),1000)
+data2<-na.omit(data_cut)
+data2<-data2[data2$lgm_tot_p50>0,]
+data2<-data2[which(data2$logM200_L>0),]
+data2<-data2[which(data2$RprojLW_Rvir>0),]
+data2<-data2[which(data2$sfr_tot_p50>0),]
+
+trainIndex <- sample(1:nrow(data2),400)
 data3<-data2[trainIndex,]
 
 #data2$bpt<-as.factor(data2$bpt)
-data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0","Composi"="0",
+data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
                                  "Seyfert"="1","BLANK"="0"))
 
-data3$R_rvir = data3$Rproj_L/data3$rvir
+# Standardized variables
+
+data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),data3$zoo)
+
+
+
+#data3$R_rvir = data3$Rproj_L/data3$rvir
 # Prepare data for JAGS
-data3$logMstar_p50<-(data3$logMstar_p50-mean(data3$logMstar_p50))/sd(data3$logMstar_p50)
-data3$logMhalo<-(data3$logMhalo-mean(data3$logMhalo))/sd(data3$logMhalo)
+#data3$lgm_tot_p50<-(data3$lgm_tot_p50-mean(data3$lgm_tot_p50))/sd(data3$lgm_tot_p50)
+#data3$logMhalo<-(data3$logMhalo-mean(data3$logMhalo))/sd(data3$logMhalo)
 #data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
-data3$R_rvir<-(data3$R_rvir-mean(data3$R_rvir))/sd(data3$R_rvir)
+#data3$R_rvir<-(data3$R_rvir-mean(data3$R_rvir))/sd(data3$R_rvir)
 
 
-X<-model.matrix(~logMstar_p50+logMhalo+R_rvir,data=data3)
+X<-model.matrix(~lgm_tot_p50+logM200_L+RprojLW_Rvir+sfr_tot_p50,data=data_n)
 K<-ncol(X)
 
 jags.data <- list(Y= as.numeric(data3$bpt)-1,
-                  N = nrow(data3),
+                  N = nrow(data_n),
                   X=X,
-#                  b0 = rep(0,K),
-#                  B0=diag(1e-4,K),
-                  Npred = K
+                  b0 = rep(0,K),
+                  B0=diag(1e-4,K)
+#                  Npred = K
 )
 model<-"model{
 #1. Priors
-#beta~dmnorm(b0[],B0[,]) # Normal Priors
+beta~dmnorm(b0[],B0[,]) # Normal Priors
 # Jefreys priors for sparseness
-for(j in 1:Npred)   {
-lnTau[j] ~ dunif(-50, 50)
-TauM[j] <- exp(lnTau[j])
-beta[j] ~ dnorm(0, TauM[j])
-Ind[j] <- step(abs(beta[j]) - 0.05)
-}
+#for(j in 1:Npred)   {
+#lnTau[j] ~ dunif(-50, 50)
+#TauM[j] <- exp(lnTau[j])
+#beta[j] ~ dnorm(0, TauM[j])
+#Ind[j] <- step(abs(beta[j]) - 0.05)
+#}
 
 #2. Likelihood
 
