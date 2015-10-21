@@ -19,9 +19,9 @@ require(plyr)
 
 # Read and format data
 data<-read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
-data$tempbar<-data$t03_bar_a06_bar_flag*2+data$t03_bar_a07_no_bar_flag
+#data$tempbar<-data$t03_bar_a06_bar_flag*2+data$t03_bar_a07_no_bar_flag
 #data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo","tempbar")]
-data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo")]
+data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","zoo")]
 #data_cut<-data_cut[which(data$tempbar==1 | data$tempbar==2),]
 
 
@@ -29,8 +29,8 @@ data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","
 data2<-na.omit(data_cut)
 data2<-data2[data2$lgm_tot_p50>0,]
 data2<-data2[which(data2$logM200_L>0),]
-data2<-data2[which(data2$RprojLW_Rvir>0),]
-data2<-data2[which(data2$sfr_tot_p50>0),]
+data2<-data2[which(data2$RprojLW_Rvir>=0),]
+#data2<-data2[which(data2$specsfr_tot_p50>=0),]
 
 # bar 
 
@@ -51,7 +51,8 @@ data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
 
 # Standardized variables
 
-data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),zoo=data3$zoo)
+data_n<-data3
+#data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),zoo=data3$zoo)
 #data_n<-data_n[which(data_n$zoo=="S" | data_n$zoo=="E"),]
 
 
@@ -62,34 +63,36 @@ data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),zoo=data3$zoo)
 #data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
 #data3$R_rvir<-(data3$R_rvir-mean(data3$R_rvir))/sd(data3$R_rvir)
 
-galtype<-match(data3$zoo,c("E", "S","U"))
-Ntype<-length(unique(data3$zoo))
+#data_n2<-subset(data_n, zoo=="E" | zoo == "S")
+galtype<-match(data_n2$zoo,c("E", "S"))
+Ntype<-length(unique(data_n2$zoo))
 
 
-X<-model.matrix(~lgm_tot_p50+logM200_L+RprojLW_Rvir+sfr_tot_p50,data=data_n)
+X<-model.matrix(~lgm_tot_p50+logM200_L+RprojLW_Rvir+sfr_tot_p50,data=data_n2)
 K<-ncol(X)
 
+data_n2$zoo<-droplevels(data_n2$zoo)
 
-jags.data <- list(Y= as.numeric(data3$bpt)-1,
-                  N = nrow(data_n),
+jags.data <- list(Y= as.numeric(data_n2$bpt)-1,
+                  N = nrow(data_n2),
                   X=X,
                   b0 = rep(0,K),
                   B0=diag(1e-4,K),
                   galtype = galtype,
                   #                 bar=bar,
-                  Ntype=Ntype
-#                  Npred = K
+                  Ntype=Ntype,
+                  Npred = K
 )
 model<-"model{
 #1. Priors
-beta~dmnorm(b0[],B0[,]) # Normal Priors
+#beta~dmnorm(b0[],B0[,]) # Normal Priors
 # Jefreys priors for sparseness
-#for(j in 1:Npred)   {
-#lnTau[j] ~ dunif(-50, 50)
-#TauM[j] <- exp(lnTau[j])
-#beta[j] ~ dnorm(0, TauM[j])
-#Ind[j] <- step(abs(beta[j]) - 0.05)
-#}
+for(j in 1:Npred)   {
+lnTau[j] ~ dunif(-50, 50)
+TauM[j] <- exp(lnTau[j])
+beta[j] ~ dnorm(0, TauM[j])
+Ind[j] <- step(abs(beta[j]) - 0.05)
+}
 
 # Random intercept 
 for (j in 1:Ntype){
@@ -130,10 +133,10 @@ jags.logit <- run.jags(method="rjparallel",
                        inits = list(inits1,inits2,inits3),
                        model=model,
                        n.chains = 3,
-                       adapt=1000,
+                       adapt=2000,
                        monitor=c(params),
                        burnin=5000,
-                       sample=15000,
+                       sample=25000,
                        summarise=FALSE,
                        plots=FALSE
 )
