@@ -21,7 +21,7 @@ require(plyr)
 data<-read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
 #data$tempbar<-data$t03_bar_a06_bar_flag*2+data$t03_bar_a07_no_bar_flag
 #data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo","tempbar")]
-data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","zoo")]
+data_cut<-data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo")]
 #data_cut<-data_cut[which(data$tempbar==1 | data$tempbar==2),]
 
 
@@ -30,7 +30,7 @@ data2<-na.omit(data_cut)
 data2<-data2[data2$lgm_tot_p50>0,]
 data2<-data2[which(data2$logM200_L>0),]
 data2<-data2[which(data2$RprojLW_Rvir>=0),]
-#data2<-data2[which(data2$specsfr_tot_p50>=0),]
+data2<-data2[which(data2$sfr_tot_p50>=-100),]
 
 # bar 
 
@@ -38,8 +38,8 @@ data2<-data2[which(data2$RprojLW_Rvir>=0),]
 #
 
 
-#trainIndex <- sample(1:nrow(data2),400)
-data3<-data2
+trainIndex <- sample(1:nrow(data2),400)
+data3<-data2[trainIndex]
 
 #data2$bpt<-as.factor(data2$bpt)
 data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
@@ -63,7 +63,7 @@ data_n<-data3
 #data2$vlos_sigma<-(data2$vlos_sigma-mean(data2$vlos_sigma))/sd(data2$vlos_sigma)
 #data3$R_rvir<-(data3$R_rvir-mean(data3$R_rvir))/sd(data3$R_rvir)
 
-#data_n2<-subset(data_n, zoo=="E" | zoo == "S")
+data_n2<-subset(data_n, zoo=="E" | zoo == "S")
 galtype<-match(data_n2$zoo,c("E", "S"))
 Ntype<-length(unique(data_n2$zoo))
 
@@ -77,7 +77,7 @@ jags.data <- list(Y= as.numeric(data_n2$bpt)-1,
                   N = nrow(data_n2),
                   X=X,
                   b0 = rep(0,K),
-                  B0=diag(1e-4,K),
+                 B0=diag(1e-4,K),
                   galtype = galtype,
                   #                 bar=bar,
                   Ntype=Ntype,
@@ -95,8 +95,9 @@ Ind[j] <- step(abs(beta[j]) - 0.05)
 }
 
 # Random intercept 
+tau2~dgamma(0.01,0.01)
 for (j in 1:Ntype){
-ranef[j]~dnorm(0,0.001)
+ranef[j]~ddexp(0,tau2)
 }
 
 
@@ -133,10 +134,10 @@ jags.logit <- run.jags(method="rjparallel",
                        inits = list(inits1,inits2,inits3),
                        model=model,
                        n.chains = 3,
-                       adapt=2000,
+                       adapt=5000,
                        monitor=c(params),
-                       burnin=5000,
-                       sample=25000,
+                       burnin=1000,
+                       sample=30000,
                        summarise=FALSE,
                        plots=FALSE
 )
@@ -144,15 +145,15 @@ jags.logit <- run.jags(method="rjparallel",
 jagssamples <- as.mcmc.list(jags.logit)
 
 G1<-ggs(jagssamples,family="beta")
-ggs_caterpillar(G1)+theme_few()+
+ggs_density(G1)+theme_few()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=18),
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  scale_colour_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))+
-  scale_fill_manual(values=c("#00526D", "#00A3DB", "#7A2713", "#939598", "#6CCFF6"))
+  scale_color_stata()+
+  scale_fill_stata()
 
 
 
