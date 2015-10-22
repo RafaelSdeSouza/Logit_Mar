@@ -1,3 +1,5 @@
+# One dimensional 
+
 # JAGS Code with Adaptive Shrinkage
 #  Required libraries
 library(rjags)
@@ -68,7 +70,7 @@ galtype<-match(data_n2$zoo,c("E", "S"))
 Ntype<-length(unique(data_n2$zoo))
 
 
-X<-model.matrix(~lgm_tot_p50+logM200_L+RprojLW_Rvir+sfr_tot_p50,data=data_n2)
+X<-model.matrix(~sfr_tot_p50,data=data_n2)
 K<-ncol(X)
 
 data_n2$zoo<-droplevels(data_n2$zoo)
@@ -76,8 +78,8 @@ data_n2$zoo<-droplevels(data_n2$zoo)
 jags.data <- list(Y= as.numeric(data_n2$bpt)-1,
                   N = nrow(data_n2),
                   X=X,
-#                  b0 = rep(0,K),
-#                 B0=diag(1e-4,K),
+                                    b0 = rep(0,K),
+                                   B0=diag(1e-4,K),
                   galtype = galtype,
                   #                 bar=bar,
                   Ntype=Ntype,
@@ -85,14 +87,14 @@ jags.data <- list(Y= as.numeric(data_n2$bpt)-1,
 )
 model<-"model{
 #1. Priors
-#beta~dmnorm(b0[],B0[,]) # Normal Priors
+beta~dmnorm(b0[],B0[,]) # Normal Priors
 # Jefreys priors for sparseness
-for(j in 1:Npred)   {
-lnTau[j] ~ dunif(-50, 50)
-TauM[j] <- exp(lnTau[j])
-beta[j] ~ dnorm(0, TauM[j])
-Ind[j] <- step(abs(beta[j]) - 0.05)
-}
+#for(j in 1:Npred)   {
+#lnTau[j] ~ dunif(-50, 50)
+#TauM[j] <- exp(lnTau[j])
+#beta[j] ~ dnorm(0, TauM[j])
+#Ind[j] <- step(abs(beta[j]) - 0.05)
+#}
 
 #LASSO
 
@@ -194,6 +196,3 @@ P1<-ggplot(aes(x=x,y=mean),data=gdata)+geom_line()+
 cairo_pdf("logit_AGN.pdf",width = 8, height = 7)
 P1
 dev.off()
-
-
-

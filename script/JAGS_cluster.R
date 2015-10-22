@@ -1,11 +1,8 @@
+# Code to run in the cluster
+
 # JAGS Code with Adaptive Shrinkage
 #  Required libraries
 library(rjags)
-library(ggmcmc)
-library(ggplot2)
-library(ggthemes)
-library(pander)
-library(Cairo)
 library(MASS)
 library(scales)
 library(plyr)
@@ -38,7 +35,7 @@ data2<-data2[which(data2$sfr_tot_p50>=-100),]
 #
 
 
-trainIndex <- sample(1:nrow(data2),10000)
+trainIndex <- sample(1:nrow(data2),400)
 data3<-data2[trainIndex]
 
 #data2$bpt<-as.factor(data2$bpt)
@@ -53,6 +50,7 @@ data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
 
 data_n<-data3
 #data_n<-data.frame(data3$bpt,as.data.frame(scale(data3[,2:5])),zoo=data3$zoo)
+#data_n<-data_n[which(data_n$zoo=="S" | data_n$zoo=="E"),]
 
 
 #data3$R_rvir = data3$Rproj_L/data3$rvir
@@ -64,7 +62,6 @@ data_n<-data3
 
 data_n2<-subset(data_n, zoo=="E" | zoo == "S")
 galtype<-match(data_n2$zoo,c("E", "S"))
-#galtype<-as.numeric(data_n2$zoo)-1
 Ntype<-length(unique(data_n2$zoo))
 
 
@@ -76,42 +73,29 @@ data_n2$zoo<-droplevels(data_n2$zoo)
 jags.data <- list(Y= as.numeric(data_n2$bpt)-1,
                   N = nrow(data_n2),
                   X=X,
-#                  b0 = rep(0,K),
-#                 B0=diag(1e-4,K),
+                  b0 = rep(0,K),
+                  B0=diag(1e-4,K),
                   galtype = galtype,
                   #                 bar=bar,
-                  Ntype=Ntype,
-                  Npred = K
+                  Ntype=Ntype
+                  #                  Npred = K
 )
 model<-"model{
 #1. Priors
-#beta~dmnorm(b0[],B0[,]) # Normal Priors
+beta~dmnorm(b0[],B0[,]) # Normal Priors
 # Jefreys priors for sparseness
-for(j in 1:Npred)   {
-lnTau[j] ~ dunif(-50, 50)
-TauM[j] <- exp(lnTau[j])
-beta[j] ~ dnorm(0, TauM[j])
-Ind[j] <- step(abs(beta[j]) - 0.05)
-}
-
-#LASSO
-
-#for(j in 1:Npred){
-#beta[j]~ddexp(0,tau)
+#for(j in 1:Npred)   {
+#lnTau[j] ~ dunif(-50, 50)
+#TauM[j] <- exp(lnTau[j])
+#beta[j] ~ dnorm(0, TauM[j])
+#Ind[j] <- step(abs(beta[j]) - 0.05)
 #}
-#prior for tau
-#tau <-pow(sdBeta,-1)
-#sdBeta ~ dgamma(0.01,0.01)
-
 
 # Random intercept 
-tau2~dgamma(1e-3,1e-3)
-ranef[1]~dbern(0)
-ranef[2]~dnorm(0,1/tau2)
-
-#for (j in 2:Ntype){
-#ranef[j]~dnorm(0,1/tau2)
-#}
+tau2~dgamma(0.001,0.001)
+for (j in 1:Ntype){
+ranef[j]~dnorm(0,1/tau2)
+}
 
 
 #2. Likelihood
@@ -128,8 +112,8 @@ NewPred[i]~dbern(pi[i])
 
 }"
 
-#params <- c("beta","ranef")
-params <- c("beta","pi","Ind","NewPred")
+params <- c("beta","ranef")
+#params <- c("beta","pi","Ind","NewPred")
 
 inits0  <- function () {
   list(beta = rnorm(K, 0, 0.01))}
@@ -156,44 +140,3 @@ jags.logit <- run.jags(method="rjparallel",
 )
 
 jagssamples <- as.mcmc.list(jags.logit)
-
-G1<-ggs(jagssamples,family="beta")
-ggs_density(G1)+theme_few()+
-  theme(legend.position="none",plot.title = element_text(hjust=0.5),
-        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
-        axis.text.y=element_text(size=18),
-        strip.text.x=element_text(size=25),
-        axis.title.x=element_text(vjust=-0.25),
-        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  scale_color_stata()+
-  scale_fill_stata()
-
-
-
-pi_AGN<-summary(as.mcmc.list(jags.logit, vars="pi"))
-pi_AGN<-pi_AGN$quantiles
-
-gdata<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
-
-
-
-# Plot fit 
-
-P1<-ggplot(aes(x=x,y=mean),data=gdata)+geom_line()+
-  geom_ribbon(data=gdata,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.45, fill=c("#005502")) +
-  geom_ribbon(data=gdata,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.35, fill=c("#3A5F0B")) +
-  theme_hc()+
-  theme(legend.position="none",plot.title = element_text(hjust=0.5),
-        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
-        axis.text.y=element_text(size=18),
-        strip.text.x=element_text(size=25),
-        axis.title.x=element_text(vjust=-0.25),
-        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(SFR))+ylab(expression(P[AGN]))
-
-cairo_pdf("logit_AGN.pdf",width = 8, height = 7)
-P1
-dev.off()
-
-
-
