@@ -7,16 +7,20 @@ cl       <- makeCluster(3) # For parallel computing
 
 # Read and format data
 data     <- read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
-data_cut <- data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","zoo")]
+data_cut <- data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo")]
 data2    <- na.omit(data_cut)
 data2    <- data2[data2$lgm_tot_p50>0,]
 data2    <- data2[which(data2$logM200_L>0),]
 data2    <- data2[which(data2$RprojLW_Rvir>=0),]
 data2    <- data2[which(data2$sfr_tot_p50>=-100),]
 
-trainIndex <- sample(1:nrow(data2),1000)
+# Standardized variables
+
+data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
+
+trainIndex <- sample(1:nrow(data2),500)
 data3      <- data2[trainIndex,]
-data3    <- subset(data3, bpt!="LINER")    # remove Liners
+#data3    <- subset(data3, bpt!="LINER")    # remove Liners
 data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
                                  "Seyfert"="1","BLANK"="0"))
@@ -27,26 +31,76 @@ data_n     <- data3
 data_n2    <- subset(data_n, zoo=="E" | zoo == "S")
 galtype    <- match(data_n2$zoo,c("E", "S")) 
 galtype    <- galtype-1                 # 0 = E and 1 = S
-X          <- model.matrix(~lgm_tot_p50+logM200_L+RprojLW_Rvir+sfr_tot_p50+galtype,data=data_n2) # Predictors
+X          <- model.matrix( ~ lgm_tot_p50 + logM200_L + RprojLW_Rvir + 
+                              sfr_tot_p50 + color_gr + galtype, data = data_n2) # Predictors
 K          <- ncol(X)                   # Number of Predictors including the intercept 
 y          <- as.numeric(data_n2$bpt)-1 # Response variable (0/1)
 n          <- length(y)                 # Sample size
 
-jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K))
+
+# Grid of values for prediction 
+gx <- seq(1.5*min(X[,2]),1.5*max(X[,2]),length.out=100)
+Mx <- seq(1.5*min(X[,2]),1.5*max(X[,3]),length.out=100)
+Rx <- seq(1.5*min(X[,2]),1.5*max(X[,4]),length.out=100)
+sfrx <- seq(1.5*min(X[,2]),1.5*max(X[,5]),length.out=100)
+grx <-  seq(1.5*min(X[,2]),1.5*max(X[,6]),length.out=100) 
+ 
+
+jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),gx=gx,Mx=Mx,
+                   Rx=Rx,sfrx=sfrx, grx = grx )
 # b0 and B0 are the mean vector and the inverse of the covariance matrix of prior distribution of the regression coefficients
 
 ### Prior Specification and Likelihood function
 model<-"model{
 #1. Priors
-beta~dmnorm(b0,B0) 
+
+#a.Normal 
+beta~dmnorm(b0,B0)                                    
+
+#b.Jefreys priors for sparseness
+#for(j in 1:K)   {
+#lnTau[j] ~ dunif(-50, 50)
+#TauM[j] <- exp(lnTau[j])
+#beta[j] ~ dnorm(0, TauM[j])
+#Ind[j] <- step(abs(beta[j]) - 0.05)
+#}
+
+#c.LASSO
+
+#for(j in 1:K){
+#beta[j]~ddexp(0,tau)
+#}
+#c1.prior for tau
+#tau <-pow(sdBeta,-1)
+#sdBeta ~ dgamma(0.01,0.01)
+
 #2. Likelihood
 for(i in 1:N){
 Y[i] ~ dbern(pi[i])
 logit(pi[i]) <-  eta[i]
 eta[i] <- inprod(beta, X[i,])
+}
+
+#3.Probability for each variable 
+# E galaxies
+for(l in 1:100){
+logit(pgx[l])<-beta[1]+beta[2]*gx[l]
+#logit(pMx[l])<-beta[1]+beta[3]*Mx[l]
+#logit(pRx[i])<-beta[1]+beta[4]*Rx[i]
+#logit(psfrx[i])<-beta[1]+beta[5]*sfrx[i]
+#logit(pgrx[i])<-beta[1]+beta[6]*grx[i]
+
+# S galaxies
+#logit(pgxS[i])<-beta[1]+beta[2]*gx+beta[7]
+#logit(pMxS[i])<-beta[1]+beta[3]*Mx+beta[7]
+#logit(pRxS[i])<-beta[1]+beta[4]*Rx+beta[7]
+#logit(psfrS[i])<-beta[1]+beta[5]*sfrx+beta[7]
+#logit(pgrS[i])<-beta[1]+beta[6]*grx+beta[7]
+
+
              }
              }"
-params <- c("beta","pi")                                # Monitor these parameters.
+params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx")                         # Monitor these parameters.
 inits0  <- function () {list(beta = rnorm(K, 0, 0.01))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
@@ -61,7 +115,7 @@ jags.logit  <- run.jags(method="rjparallel",data = jags.data,inits = list(inits1
 
 beta     <- as.mcmc.list(jags.logit,vars="beta")
 pi       <- as.mcmc.list(jags.logit,vars="pi")
-
+plgm     <- as.mcmc.list(jags.logit,vars="plgm")
 # Trace plots and diagnostic analysis to investigate convregence
 plot(beta) 
 gelman.diag(beta)
@@ -80,7 +134,7 @@ print(summary(window(pi)))
 jagssamples <- as.mcmc.list(jags.logit)
 
 G1<-ggs(jagssamples,family="beta")
-ggs_caterpillar(G1)+theme_few()+
+plotbeta<-ggs_caterpillar(G1)+theme_few()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=18),
@@ -90,4 +144,32 @@ ggs_caterpillar(G1)+theme_few()+
   scale_color_fivethirtyeight()+
   scale_fill_fivethirtyeight()
 
+cairo_pdf("betas.pdf",width = 8, height = 7)
+plotbeta
+dev.off()
 
+
+pi_AGN<-summary(as.mcmc.list(jags.logit, vars="pi"))
+pi_AGN<-pi_AGN$quantiles
+
+gdata<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
+
+
+
+# Plot fit 
+
+P1<-ggplot(aes(x=x,y=mean),data=gdata)+geom_line()+
+  geom_ribbon(data=gdata,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.45, fill=c("#005502")) +
+  geom_ribbon(data=gdata,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.35, fill=c("#3A5F0B")) +
+  theme_hc()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  xlab(expression(SFR))+ylab(expression(P[AGN]))
+
+cairo_pdf("logit_AGN.pdf",width = 8, height = 7)
+P1
+dev.off()
