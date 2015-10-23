@@ -91,16 +91,16 @@ logit(psfrx[l])<-beta[1]+beta[5]*sfrx[l]
 logit(pgrx[l])<-beta[1]+beta[6]*grx[l]
 
 # S galaxies
-#logit(pgxS[l])<-beta[1]+beta[2]*gx[l]+beta[7]
-#logit(pMxS[l])<-beta[1]+beta[3]*Mx[l]+beta[7]
-#logit(pRxS[l])<-beta[1]+beta[4]*Rx[l]+beta[7]
-#logit(psfrS[l])<-beta[1]+beta[5]*sfrx[l]+beta[7]
-#logit(pgrS[l])<-beta[1]+beta[6]*grx[l]+beta[7]
-
+logit(pgxS[l])<-beta[1]+beta[2]*gx[l]+beta[7]
+logit(pMxS[l])<-beta[1]+beta[3]*Mx[l]+beta[7]
+logit(pRxS[l])<-beta[1]+beta[4]*Rx[l]+beta[7]
+logit(psfrS[l])<-beta[1]+beta[5]*sfrx[l]+beta[7]
+logit(pgrS[l])<-beta[1]+beta[6]*grx[l]+beta[7]
 
              }
              }"
-params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx")                         # Monitor these parameters.
+params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx",
+            "pgxS","pMxS","pRxS","psfrS","pgrS")        # Monitor these parameters.
 inits0  <- function () {list(beta = rnorm(K, 0, 0.01))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
@@ -134,6 +134,15 @@ print(summary(window(pi)))
 
 jagssamples <- as.mcmc.list(jags.logit)
 
+labels<-c(expression(beta[0]),expression(beta[1]),expression(beta[2]),
+          expression(beta[3]),expression(beta[4]),expression(beta[5]),expression(beta[6]))
+L.radon.intercepts <- data.frame(
+  Parameter=paste("beta[", seq(1:7), "]", sep=""),
+  Label=labels)
+head(L.radon.intercepts)
+
+#"lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo"
+
 G1<-ggs(jagssamples,family="beta")
 plotbeta<-ggs_caterpillar(G1)+theme_few()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
@@ -143,7 +152,7 @@ plotbeta<-ggs_caterpillar(G1)+theme_few()+
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
   scale_color_fivethirtyeight()+
-  scale_fill_fivethirtyeight()
+  scale_fill_fivethirtyeight()+aes(color="blue")
 
 cairo_pdf("betas.pdf",width = 8, height = 7)
 plotbeta
@@ -165,20 +174,88 @@ gdata1<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi
 
 pi_gx<-summary(as.mcmc.list(jags.logit, vars="pgx"))
 pi_gx<-pi_gx$quantiles
+ggx<-data.frame(x=sfrx,mean=pi_sfrS[,3],lwr1=pi_sfrS[,2],lwr2=pi_sfrS[,1],upr1=pi_sfrS[,4],upr2=pi_sfrS[,5])
 
+pi_gx<-summary(as.mcmc.list(jags.logit, vars="pgx"))
+pi_gx<-pi_gx$quantiles
+ggx<-data.frame(x=sfrx,mean=pi_sfrS[,3],lwr1=pi_sfrS[,2],lwr2=pi_sfrS[,1],upr1=pi_sfrS[,4],upr2=pi_sfrS[,5])
+
+
+#-----------##-----------#-----------##-----------
 pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
 pi_Mx<-pi_Mx$quantiles
+gMx<-data.frame(x=Mx,mean=pi_Mx[,3],lwr1=pi_Mx[,2],lwr2=pi_Mx[,1],upr1=pi_Mx[,4],upr2=pi_Mx[,5])
+
+pi_MxS<-summary(as.mcmc.list(jags.logit, vars="pMxS"))
+pi_MxS<-pi_MxS$quantiles
+gMxS<-data.frame(x=Mx,mean=pi_MxS[,3],lwr1=pi_MxS[,2],lwr2=pi_MxS[,1],upr1=pi_MxS[,4],upr2=pi_MxS[,5])
+#-----------##-----------#-----------##-----------
+
 
 pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
 pi_Rx<-pi_Rx$quantiles
 
+#-----------##-----------#-----------##-----------
 pi_sfrx<-summary(as.mcmc.list(jags.logit, vars="psfrx"))
 pi_sfrx<-pi_sfrx$quantiles
+gsfr<-data.frame(x=sfrx,mean=pi_sfrx[,3],lwr1=pi_sfrx[,2],lwr2=pi_sfrx[,1],upr1=pi_sfrx[,4],upr2=pi_sfrx[,5])
+
+pi_sfrS<-summary(as.mcmc.list(jags.logit, vars="psfrS"))
+pi_sfrS<-pi_sfrS$quantiles
+gsfrS<-data.frame(x=sfrx,mean=pi_sfrS[,3],lwr1=pi_sfrS[,2],lwr2=pi_sfrS[,1],upr1=pi_sfrS[,4],upr2=pi_sfrS[,5])
+#-----------##-----------#-----------##-----------
+
 
 pi_grx<-summary(as.mcmc.list(jags.logit, vars="pgrx"))
 pi_grx<-pi_grx$quantiles
 
+#p_all<-rbind(pi_gx,pi_Mx,pi_Rx)
+#p_all2<-cbind(p_all,data.frame(rep(c("gal","Mhalo","Rproj"),each=100)))
+#colnames(p_all2)<-c("2.5","25","50","75","97.5","probs")
 
+# Plots for each parameter
+
+#a) SFR
+Psfr<-ggplot(aes(x=x,y=mean),data=gsfr)+geom_line()+
+  geom_ribbon(data=gsfr,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.50, fill=c("#d7301f")) +
+  geom_ribbon(data=gsfr,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.40, fill=c("#feb24c")) +
+  geom_line(aes(x=x,y=mean),data=gsfrS)+
+  geom_ribbon(data=gsfrS,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.50, fill=c("#034e7b")) +
+  geom_ribbon(data=gsfrS,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.40, fill=c("#a6bddb")) +
+  theme_hc()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  xlab(expression(SFR))+ylab(expression(P[AGN]))
+cairo_pdf("P_sfr.pdf",width = 8, height = 7)
+Psfr
+dev.off()
+
+#b) M_gal
+PMx<-ggplot(aes(x=x,y=mean),data=gMx)+geom_line()+
+  geom_ribbon(data=gMx,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.50, fill=c("#d7301f")) +
+  geom_ribbon(data=gMx,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.40, fill=c("#feb24c")) +
+  geom_line(aes(x=x,y=mean),data=gMxS)+
+  geom_ribbon(data=gMxS,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.50, fill=c("#034e7b")) +
+  geom_ribbon(data=gMxS,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.40, fill=c("#a6bddb")) +
+  theme_hc()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  xlab(expression(M[gal]))+ylab(expression(P[AGN]))
+cairo_pdf("P_sfr.pdf",width = 8, height = 7)
+Psfr
+dev.off()
+
+
+
+#gdata_pall<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
 # Plot fit 
 
 P1<-ggplot(aes(x=x,y=mean),data=gdata)+geom_line()+

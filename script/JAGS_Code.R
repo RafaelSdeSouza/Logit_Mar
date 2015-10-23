@@ -33,13 +33,13 @@ data2<-data2[which(data2$RprojLW_Rvir>=0),]
 data2<-data2[which(data2$sfr_tot_p50>=-100),]
 
 # bar 
-
-
+#dat<-read.table("path",header=F,sep="")
+#write.csv(dat,"path")
 #
 
 
-trainIndex <- sample(1:nrow(data2),10000)
-data3<-data2[trainIndex]
+trainIndex <- sample(1:nrow(data2),500)
+data3<-data2[trainIndex,]
 
 #data2$bpt<-as.factor(data2$bpt)
 data3$bpt <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
@@ -158,7 +158,7 @@ jags.logit <- run.jags(method="rjparallel",
 jagssamples <- as.mcmc.list(jags.logit)
 
 G1<-ggs(jagssamples,family="beta")
-ggs_density(G1)+theme_few()+
+ggs_caterpillar(G1)+theme_few()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=18),
@@ -167,6 +167,7 @@ ggs_density(G1)+theme_few()+
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
   scale_color_stata()+
   scale_fill_stata()
+
 
 
 
