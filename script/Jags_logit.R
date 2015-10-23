@@ -85,17 +85,17 @@ eta[i] <- inprod(beta, X[i,])
 # E galaxies
 for(l in 1:100){
 logit(pgx[l])<-beta[1]+beta[2]*gx[l]
-#logit(pMx[l])<-beta[1]+beta[3]*Mx[l]
-#logit(pRx[i])<-beta[1]+beta[4]*Rx[i]
-#logit(psfrx[i])<-beta[1]+beta[5]*sfrx[i]
-#logit(pgrx[i])<-beta[1]+beta[6]*grx[i]
+logit(pMx[l])<-beta[1]+beta[3]*Mx[l]
+logit(pRx[l])<-beta[1]+beta[4]*Rx[l]
+logit(psfrx[l])<-beta[1]+beta[5]*sfrx[l]
+logit(pgrx[l])<-beta[1]+beta[6]*grx[l]
 
 # S galaxies
-#logit(pgxS[i])<-beta[1]+beta[2]*gx+beta[7]
-#logit(pMxS[i])<-beta[1]+beta[3]*Mx+beta[7]
-#logit(pRxS[i])<-beta[1]+beta[4]*Rx+beta[7]
-#logit(psfrS[i])<-beta[1]+beta[5]*sfrx+beta[7]
-#logit(pgrS[i])<-beta[1]+beta[6]*grx+beta[7]
+#logit(pgxS[l])<-beta[1]+beta[2]*gx[l]+beta[7]
+#logit(pMxS[l])<-beta[1]+beta[3]*Mx[l]+beta[7]
+#logit(pRxS[l])<-beta[1]+beta[4]*Rx[l]+beta[7]
+#logit(psfrS[l])<-beta[1]+beta[5]*sfrx[l]+beta[7]
+#logit(pgrS[l])<-beta[1]+beta[6]*grx[l]+beta[7]
 
 
              }
@@ -115,7 +115,8 @@ jags.logit  <- run.jags(method="rjparallel",data = jags.data,inits = list(inits1
 
 beta     <- as.mcmc.list(jags.logit,vars="beta")
 pi       <- as.mcmc.list(jags.logit,vars="pi")
-plgm     <- as.mcmc.list(jags.logit,vars="plgm")
+pgx     <- as.mcmc.list(jags.logit,vars="pgx")
+
 # Trace plots and diagnostic analysis to investigate convregence
 plot(beta) 
 gelman.diag(beta)
@@ -149,11 +150,33 @@ plotbeta
 dev.off()
 
 
+
+# Plot all probabilities 
 pi_AGN<-summary(as.mcmc.list(jags.logit, vars="pi"))
 pi_AGN<-pi_AGN$quantiles
 
 gdata<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
 
+
+
+pi_AGN<-summary(as.mcmc.list(jags.logit, vars="pi"))
+pi_AGN<-pi_AGN$quantiles
+gdata1<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
+
+pi_gx<-summary(as.mcmc.list(jags.logit, vars="pgx"))
+pi_gx<-pi_gx$quantiles
+
+pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
+pi_Mx<-pi_Mx$quantiles
+
+pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
+pi_Rx<-pi_Rx$quantiles
+
+pi_sfrx<-summary(as.mcmc.list(jags.logit, vars="psfrx"))
+pi_sfrx<-pi_sfrx$quantiles
+
+pi_grx<-summary(as.mcmc.list(jags.logit, vars="pgrx"))
+pi_grx<-pi_grx$quantiles
 
 
 # Plot fit 
