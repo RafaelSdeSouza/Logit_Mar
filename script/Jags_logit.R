@@ -13,12 +13,12 @@ data2    <- data2[data2$lgm_tot_p50>0,]
 data2    <- data2[which(data2$logM200_L>0),]
 data2    <- data2[which(data2$RprojLW_Rvir>=0),]
 data2    <- data2[which(data2$sfr_tot_p50>=-100),]
-
+data2$RprojLW_Rvir<-log(data2$RprojLW_Rvir,10)
 # Standardized variables
 
 data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
 
-trainIndex <- sample(1:nrow(data2),500)
+trainIndex <- sample(1:nrow(data2),100)
 data3      <- data2[trainIndex,]
 #data3    <- subset(data3, bpt!="LINER")    # remove Liners
 data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
@@ -36,14 +36,14 @@ X          <- model.matrix( ~ lgm_tot_p50 + logM200_L + RprojLW_Rvir +
 K          <- ncol(X)                   # Number of Predictors including the intercept 
 y          <- as.numeric(data_n2$bpt)-1 # Response variable (0/1)
 n          <- length(y)                 # Sample size
-
+J          <-2
 
 # Grid of values for prediction 
-gx <- seq(1.5*min(X[,2]),1.5*max(X[,2]),length.out=100)
-Mx <- seq(1.5*min(X[,2]),1.5*max(X[,3]),length.out=100)
-Rx <- seq(1.5*min(X[,2]),1.5*max(X[,4]),length.out=100)
-sfrx <- seq(1.5*min(X[,2]),1.5*max(X[,5]),length.out=100)
-grx <-  seq(1.5*min(X[,2]),1.5*max(X[,6]),length.out=100) 
+gx <- seq(1.75*min(X[,2]),1.75*max(X[,2]),length.out=250)
+Mx <- seq(1.75*min(X[,2]),1.75*max(X[,3]),length.out=250)
+Rx <- seq(1.75*min(X[,2]),1.75*max(X[,4]),length.out=250)
+sfrx <- seq(1.75*min(X[,2]),1.75*max(X[,5]),length.out=250)
+grx <-  seq(1.75*min(X[,2]),1.75*max(X[,6]),length.out=250) 
  
 
 jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),gx=gx,Mx=Mx,
@@ -55,7 +55,14 @@ model<-"model{
 #1. Priors
 
 #a.Normal 
-beta~dmnorm(b0,B0)                                    
+#beta~dmnorm(b0,B0)                                    
+tau~dgamma(0.01,0.01)
+for(k in 1:K){
+    for(j in 1:J){
+      beta[k,j] ~ dnorm(0,tau)
+    }  # close J loop
+  }  # close K loop
+
 
 #b.Jefreys priors for sparseness
 #for(j in 1:K)   {
@@ -75,15 +82,19 @@ beta~dmnorm(b0,B0)
 #sdBeta ~ dgamma(0.01,0.01)
 
 #2. Likelihood
-for(i in 1:N){
-Y[i] ~ dbern(pi[i])
-logit(pi[i]) <-  eta[i]
-eta[i] <- inprod(beta, X[i,])
-}
+    for(i in 1:N){
+Y[i] ~ dbern(pi[i,1:J])
+    for (j in 1:J){
+#logit(pi[i,j]) <-  eta[i]
+#eta[i] <- inprod(beta[galtype[i]], X[i,])
+logit(pi[i,j]) <- beta[1,j]+beta[2,j]*X[2,]+beta[3,j]*X[3,]+beta[4,j]*X[4,]+beta[5,j]*X[5,]+beta[6,j]*X[6,]+
+beta[7,j]*X[7,]
+ }   # close J loop
+ }     # close N loop
 
 #3.Probability for each variable 
 # E galaxies
-for(l in 1:100){
+for(l in 1:250){
 logit(pgx[l])<-beta[1]+beta[2]*gx[l]
 logit(pMx[l])<-beta[1]+beta[3]*Mx[l]
 logit(pRx[l])<-beta[1]+beta[4]*Rx[l]
@@ -99,10 +110,14 @@ logit(pgrS[l])<-beta[1]+beta[6]*grx[l]+beta[7]
 
              }
              }"
-params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx",
-            "pgxS","pMxS","pRxS","psfrS","pgrS")        # Monitor these parameters.
-inits0  <- function () {list(beta = rnorm(K, 0, 0.01))} # A function to generat initial values for mcmc
+#params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx",
+#            "pgxS","pMxS","pRxS","psfrS","pgrS")        # Monitor these parameters.
+params <- c("beta","pi")        # Monitor these parameters.
+#inits0  <- function () {list(beta = rnorm(K, 0, 0.01))} # A function to generat initial values for mcmc
+inits<-function(){list(beta=structure(.Data=c(rnorm(2*K,0,0.01)),.Dim=c(2,K)))}# A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
+
+
 
 # Run mcmc
 bin    = 10^4   # burn-in samples
@@ -144,17 +159,20 @@ head(L.radon.intercepts)
 #"lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo"
 
 G1<-ggs(jagssamples,family="beta")
-plotbeta<-ggs_caterpillar(G1)+theme_few()+
+plotbeta<-ggs_caterpillar(G1)+theme_hc()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=18),
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  scale_color_fivethirtyeight()+
-  scale_fill_fivethirtyeight()+aes(color="blue")
+   geom_vline(xintercept=0,linetype="dashed",colour=c("#034e7b")) +
+  aes(color="#034e7b")+ylab("")+
+  scale_y_discrete(breaks=c("beta[1]", "beta[2]", "beta[3]","beta[4]","beta[5]","beta[6]","beta[7]"),
+                   labels=c(expression(beta[1]),expression(beta[2]),expression(beta[3]),
+                   expression(beta[4]),expression(beta[5]),expression(beta[6]),expression(beta[7])))
 
-cairo_pdf("betas.pdf",width = 8, height = 7)
+CairoPDF("betas.pdf",width = 5, height = 6)
 plotbeta
 dev.off()
 
@@ -194,6 +212,12 @@ gMxS<-data.frame(x=Mx,mean=pi_MxS[,3],lwr1=pi_MxS[,2],lwr2=pi_MxS[,1],upr1=pi_Mx
 
 pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
 pi_Rx<-pi_Rx$quantiles
+gRx<-data.frame(x=Rx,mean=pi_Rx[,3],lwr1=pi_Rx[,2],lwr2=pi_Rx[,1],upr1=pi_Rx[,4],upr2=pi_Rx[,5])
+
+
+pi_RxS<-summary(as.mcmc.list(jags.logit, vars="pRxS"))
+pi_RxS<-pi_RxS$quantiles
+gRxS<-data.frame(x=Rx,mean=pi_RxS[,3],lwr1=pi_RxS[,2],lwr2=pi_RxS[,1],upr1=pi_RxS[,4],upr2=pi_RxS[,5])
 
 #-----------##-----------#-----------##-----------
 pi_sfrx<-summary(as.mcmc.list(jags.logit, vars="psfrx"))
@@ -229,7 +253,7 @@ Psfr<-ggplot(aes(x=x,y=mean),data=gsfr)+geom_line()+
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(SFR))+ylab(expression(P[AGN]))
+  xlab(expression(log~SFR))+ylab(expression(P[AGN]))
 cairo_pdf("P_sfr.pdf",width = 8, height = 7)
 Psfr
 dev.off()
@@ -249,9 +273,29 @@ PMx<-ggplot(aes(x=x,y=mean),data=gMx)+geom_line()+
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
   xlab(expression(M[gal]))+ylab(expression(P[AGN]))
-cairo_pdf("P_sfr.pdf",width = 8, height = 7)
-Psfr
+cairo_pdf("P_Mx.pdf",width = 8, height = 7)
+PMx
 dev.off()
+
+#c) R_proj
+PRx<-ggplot(aes(x=x,y=mean),data=gRx)+geom_line()+
+  geom_ribbon(data=gRx,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.50, fill=c("#d7301f")) +
+  geom_ribbon(data=gRx,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.40, fill=c("#feb24c")) +
+#  geom_line(aes(x=x,y=mean),data=gRxS)+
+#  geom_ribbon(data=gRxS,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.50, fill=c("#034e7b")) +
+#  geom_ribbon(data=gRxS,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.40, fill=c("#a6bddb")) +
+  theme_hc()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))
+cairo_pdf("P_Rx.pdf",width = 8, height = 7)
+PRx
+dev.off()
+
 
 
 
