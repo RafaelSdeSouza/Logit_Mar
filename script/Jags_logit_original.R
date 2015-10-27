@@ -13,12 +13,12 @@ data2    <- data2[data2$lgm_tot_p50>0,]
 data2    <- data2[which(data2$logM200_L>0),]
 data2    <- data2[which(data2$RprojLW_Rvir>=0),]
 data2    <- data2[which(data2$sfr_tot_p50>=-100),]
-data2$RprojLW_Rvir<-log(data2$RprojLW_Rvir,10)
+
 # Standardized variables
 
 data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
 
-trainIndex <- sample(1:nrow(data2),100)
+trainIndex <- sample(1:nrow(data2),2000)
 data3      <- data2[trainIndex,]
 #data3    <- subset(data3, bpt!="LINER")    # remove Liners
 data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
@@ -36,7 +36,7 @@ X          <- model.matrix( ~ lgm_tot_p50 + logM200_L + RprojLW_Rvir +
 K          <- ncol(X)                   # Number of Predictors including the intercept 
 y          <- as.numeric(data_n2$bpt)-1 # Response variable (0/1)
 n          <- length(y)                 # Sample size
-J          <-2
+
 
 # Grid of values for prediction 
 gx <- seq(1.75*min(X[,2]),1.75*max(X[,2]),length.out=250)
@@ -55,14 +55,7 @@ model<-"model{
 #1. Priors
 
 #a.Normal 
-#beta~dmnorm(b0,B0)                                    
-#tau~dgamma(0.01,0.01)
-for(k in 1:7){
-    for(j in 1:2){
-      beta[k,j] ~ dnorm(0,0.01)
-    }  # close J loop
-  }  # close K loop
-
+beta~dmnorm(b0,B0)                                    
 
 #b.Jefreys priors for sparseness
 #for(j in 1:K)   {
@@ -83,43 +76,33 @@ for(k in 1:7){
 
 #2. Likelihood
 for(i in 1:N){
-Y[i] ~ dbern(pi[i,1:J])
-    for (j in 1:J){
-#logit(pi[i,j]) <-  eta[i]
-#eta[i] <- inprod(beta[galtype[i]], X[i,])
-logit(pi[i,j]) <- beta[1,j]+beta[2,j]*X[i,2]+beta[3,j]*X[i,3]+beta[4,j]*X[i,4]+beta[5,j]*X[i,5]+beta[6,j]*X[i,6]+
-beta[7,j]*X[i,7]
- }   # close J loop
- }     # close N loop
-
-
+Y[i] ~ dbern(pi[i])
+logit(pi[i]) <-  eta[i]
+eta[i] <- inprod(beta[], X[i,])
+}
 
 #3.Probability for each variable 
 # E galaxies
-#for(l in 1:250){
-#logit(pgx[l])<-beta[1]+beta[2]*gx[l]
-#logit(pMx[l])<-beta[1]+beta[3]*Mx[l]
-#logit(pRx[l])<-beta[1]+beta[4]*Rx[l]
-#logit(psfrx[l])<-beta[1]+beta[5]*sfrx[l]
-#logit(pgrx[l])<-beta[1]+beta[6]*grx[l]
+for(l in 1:250){
+logit(pgx[l])<-beta[1]+beta[2]*gx[l]
+logit(pMx[l])<-beta[1]+beta[3]*Mx[l]
+logit(pRx[l])<-beta[1]+beta[4]*Rx[l]
+logit(psfrx[l])<-beta[1]+beta[5]*sfrx[l]
+logit(pgrx[l])<-beta[1]+beta[6]*grx[l]
 
 # S galaxies
-#logit(pgxS[l])<-beta[1]+beta[2]*gx[l]+beta[7]
-#logit(pMxS[l])<-beta[1]+beta[3]*Mx[l]+beta[7]
-#logit(pRxS[l])<-beta[1]+beta[4]*Rx[l]+beta[7]
-#logit(psfrS[l])<-beta[1]+beta[5]*sfrx[l]+beta[7]
-#logit(pgrS[l])<-beta[1]+beta[6]*grx[l]+beta[7]
+logit(pgxS[l])<-beta[1]+beta[2]*gx[l]+beta[7]
+logit(pMxS[l])<-beta[1]+beta[3]*Mx[l]+beta[7]
+logit(pRxS[l])<-beta[1]+beta[4]*Rx[l]+beta[7]
+logit(psfrS[l])<-beta[1]+beta[5]*sfrx[l]+beta[7]
+logit(pgrS[l])<-beta[1]+beta[6]*grx[l]+beta[7]
 
-#             }
+             }
              }"
-#params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx",
-#            "pgxS","pMxS","pRxS","psfrS","pgrS")        # Monitor these parameters.
-params <- c("beta","pi")        # Monitor these parameters.
-#inits0  <- function () {list(beta = rnorm(K, 0, 0.01))} # A function to generat initial values for mcmc
-inits0<-function(){list(beta=structure(.Data=c(rnorm(2*K,0,0.01)),.Dim=c(K,2)))}# A function to generat initial values for mcmc
+params <- c("beta","pi","pgx","pMx","pRx","psfrx","pgrx",
+            "pgxS","pMxS","pRxS","psfrS","pgrS")        # Monitor these parameters.
+inits0  <- function () {list(beta = rnorm(K, 0, 0.01))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
-
-
 
 # Run mcmc
 bin    = 10^4   # burn-in samples
