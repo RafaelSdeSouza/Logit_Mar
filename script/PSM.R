@@ -1,0 +1,73 @@
+##  R script for propensity score matching 
+#  Copyright (C) 2015  COIN
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License version 3 as published by
+#the Free Software Foundation.
+
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+
+#  A copy of the GNU General Public License is available at
+#  http://www.r-project.org/Licenses/
+#
+
+# This function performs  propensity score matching using the package MatchIt
+
+# Required libraries
+library(MatchIt);library(plyr);library(reshape2)
+
+
+
+# Read and format data
+data     <- read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
+data_cut <- data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo")]
+data2    <- na.omit(data_cut)
+data2    <- data2[data2$lgm_tot_p50>0,]
+data2    <- data2[which(data2$logM200_L>0),]
+data2    <- data2[which(data2$RprojLW_Rvir>=0),]
+data2    <- data2[which(data2$sfr_tot_p50>=-100),]
+
+# Standardized variables
+
+data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
+
+trainIndex <- sample(1:nrow(data2),2000)
+data3      <- data2[trainIndex,]
+#data3    <- subset(data3, bpt!="LINER")    # remove Liners
+data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
+                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
+                                  "Seyfert"="1","BLANK"="0"))
+
+
+
+data_n     <- data3
+data_n2    <- subset(data_n, zoo=="E" | zoo == "S")
+data_n2$zoo<-droplevels(data_n2$zoo)
+
+m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")], method = 	"nearest", distance = "logit")
+
+
+matched <- match.data(m.out)
+
+# plot distribution of Mass before and after match 
+c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")
+
+
+#before match
+unmatched<-data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")]
+gmelt0<-melt(unmatched, id.vars = c('bpt'))
+
+CairoPDF("..//figures/before.pdf",height=12,width = 10)
+ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt0)+geom_density()+
+  facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
+dev.off()
+#after match
+gmelt <- melt(matched[,1:4], id.vars = c('bpt'))
+
+cairo_pdf("..//figures/after.pdf",height=12,width = 10)
+ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt)+geom_density()+
+  facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
+dev.off()

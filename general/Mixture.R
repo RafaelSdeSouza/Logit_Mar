@@ -1,18 +1,19 @@
 library(arm)
 library(caret)
 library(pROC)
-data<-read.csv("sample_agn.csv",header=TRUE,na.strings="")
+data<-read.csv("../data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
 data2<-na.omit(data)
+data2    <- data2[which(data2$sfr_tot_p50>=-100),]
 AGN_data$WHAN_Class<-as.factor(AGN_data$WHAN_Class)
 AGN_data$WHAN_Class<-revalue(AGN_data$WHAN_Class,c("2"="1","3"="1","1"="0","4"="0"))
 
 
 
 
-#sSFR<-data$sSFR
-#D1<-densityMclust(sSFR,G=2)
-#plot(D1, what = "density", data = sSFR, breaks = 25)
-#D1$classification
+SFR<-data2$sfr_tot_p50
+D1<-densityMclust(SFR,G=2)
+plot(D1, what = "density", data = SFR, breaks = 25)
+D1$classification
 
 <<<<<<< Updated upstream
 #data$SFR_class<-D1$classification-1
