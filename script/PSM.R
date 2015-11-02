@@ -34,13 +34,17 @@ data2    <- data2[which(data2$sfr_tot_p50>=-100),]
 
 data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
 
-trainIndex <- sample(1:nrow(data2),2000)
-data3      <- data2[trainIndex,]
-#data3    <- subset(data3, bpt!="LINER")    # remove Liners
-data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
-                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
-                                  "Seyfert"="1","BLANK"="0"))
-
+#trainIndex <- sample(1:nrow(data2),nrow(data2))
+data3      <- data2
+data3    <- subset(data3, bpt!="LINER")    # remove Liners
+data3    <- subset(data3, bpt!="BLANK")    # remove BLANK
+data3    <- subset(data3, bpt!="Composite")    # remove BLANK
+data3$bpt <-droplevels(data3$bpt)
+#data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Composite"="0",
+#                                  "LINER"="1","Seyfert/LINER"="1","Star Fo"="0",
+#                                  "Seyfert"="1","BLANK"="0"))
+data3$bpt  <- revalue(data3$bpt,c("Star Forming"="0","Seyfert/LINER"="1",
+                                  "Seyfert"="1"))
 
 
 data_n     <- data3
@@ -52,12 +56,16 @@ m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data
 
 matched <- match.data(m.out)
 
+write.matrix(matched,"..//data/matched.txt",sep=" ")
+
 # plot distribution of Mass before and after match 
 c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")
 
 
 #before match
 unmatched<-data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")]
+write.matrix(unmatched,"..//data/unmatched.txt",sep=" ")
+
 gmelt0<-melt(unmatched, id.vars = c('bpt'))
 
 CairoPDF("..//figures/before.pdf",height=12,width = 10)
@@ -71,3 +79,14 @@ cairo_pdf("..//figures/after.pdf",height=12,width = 10)
 ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt)+geom_density()+
   facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
 dev.off()
+
+
+
+
+matched$type<-rep("matched",nrow(matched))
+unmatched$type<-rep("unmatched",nrow(unmatched))
+full<-rbind(matched[,c(1,2,3,4,7)],unmatched)
+write.csv(full,"..//data/full.csv")
+
+
+
