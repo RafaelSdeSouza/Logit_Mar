@@ -59,7 +59,7 @@ matched <- match.data(m.out)
 write.matrix(matched,"..//data/matched.txt",sep=" ")
 
 # plot distribution of Mass before and after match 
-c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")
+
 
 
 #before match
@@ -83,10 +83,21 @@ dev.off()
 
 
 
-matched$type<-rep("matched",nrow(matched))
-unmatched$type<-rep("unmatched",nrow(unmatched))
+matched$mytype<-rep("matched",nrow(matched))
+unmatched$mytype<-rep("unmatched",nrow(unmatched))
 full<-rbind(matched[,c(1,2,3,4,7)],unmatched)
-write.csv(full,"..//data/full.csv")
 
 
+full$bpt  <- revalue(full$bpt ,c("0"="AGN 0","1"="AGN 1"))
+full$lgm_tot_p50<-round(full$lgm_tot_p50,2)
+full$sfr_tot_p50<-round(full$sfr_tot_p50,2)
+full$color_gr<-round(full$color_gr,2)
 
+write.csv(full,"..//data/full.csv",row.names = FALSE)
+
+require(beanplot)
+
+gmelt$group<-paste(gmelt$variable,gmelt$bpt,sep=" ")
+
+beanplot(value~group,border = NA,data=gmelt,side = "both",ll = 0.02,
+         col = list("black", c("grey", "white")))
