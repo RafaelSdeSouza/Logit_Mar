@@ -99,5 +99,13 @@ require(beanplot)
 
 gmelt$group<-paste(gmelt$variable,gmelt$bpt,sep=" ")
 
-beanplot(value~group,border = NA,data=gmelt,side = "both",ll = 0.02,
-         col = list("black", c("grey", "white")))
+beanplot(value~group,border = NA,data=gmelt,side = "both",ll = 0.0001,
+         col = list("blue", c("red", "white")),ylim=c(-4,4))
+
+
+
+gmelt0$group<-paste(gmelt0$variable,gmelt0$bpt,sep=" ")
+gmelt0$value<-as.numeric(gmelt0$value)
+
+beanplot(value~group,border = NA,data=gmelt0,side = "both",ll = 0.0001,
+         col = list("blue", c("red", "white")),ylim=c(-4,4))
