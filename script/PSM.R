@@ -51,61 +51,81 @@ data_n     <- data3
 data_n2    <- subset(data_n, zoo=="E" | zoo == "S")
 data_n2$zoo<-droplevels(data_n2$zoo)
 
-m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")], method = 	"nearest", distance = "logit")
+#m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")], method = 	"nearest", distance = "logit")
 
+m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data_n2, method = 	"nearest", distance = "logit")
 
 matched <- match.data(m.out)
 
 write.matrix(matched,"..//data/matched.txt",sep=" ")
 
+
+
+
+
+# Script ends here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # plot distribution of Mass before and after match 
 
 
-
 #before match
-unmatched<-data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")]
-write.matrix(unmatched,"..//data/unmatched.txt",sep=" ")
+#unmatched<-data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")]
+#write.matrix(unmatched,"..//data/unmatched.txt",sep=" ")
 
-gmelt0<-melt(unmatched, id.vars = c('bpt'))
+#gmelt0<-melt(unmatched, id.vars = c('bpt'))
 
-CairoPDF("..//figures/before.pdf",height=12,width = 10)
-ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt0)+geom_density()+
-  facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
-dev.off()
+#CairoPDF("..//figures/before.pdf",height=12,width = 10)
+#ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt0)+geom_density()+
+#  facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
+#dev.off()
 #after match
-gmelt <- melt(matched[,1:4], id.vars = c('bpt'))
+#gmelt <- melt(matched[,1:4], id.vars = c('bpt'))
 
-cairo_pdf("..//figures/after.pdf",height=12,width = 10)
-ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt)+geom_density()+
-  facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
-dev.off()
-
-
-
-
-matched$mytype<-rep("matched",nrow(matched))
-unmatched$mytype<-rep("unmatched",nrow(unmatched))
-full<-rbind(matched[,c(1,2,3,4,7)],unmatched)
-
-
-full$bpt  <- revalue(full$bpt ,c("0"="AGN 0","1"="AGN 1"))
-full$lgm_tot_p50<-round(full$lgm_tot_p50,2)
-full$sfr_tot_p50<-round(full$sfr_tot_p50,2)
-full$color_gr<-round(full$color_gr,2)
-
-write.csv(full,"..//data/full.csv",row.names = FALSE)
-
-require(beanplot)
-
-gmelt$group<-paste(gmelt$variable,gmelt$bpt,sep=" ")
-
-beanplot(value~group,border = NA,data=gmelt,side = "both",ll = 0.0001,
-         col = list("blue", c("red", "white")),ylim=c(-4,4))
+#cairo_pdf("..//figures/after.pdf",height=12,width = 10)
+#ggplot(aes(x=value,group=bpt,fill=bpt),data=gmelt)+geom_density()+
+#  facet_grid(variable~bpt)+scale_fill_stata()+theme_hc()+coord_cartesian(xlim=c(-2,4))
+#dev.off()
 
 
 
-gmelt0$group<-paste(gmelt0$variable,gmelt0$bpt,sep=" ")
-gmelt0$value<-as.numeric(gmelt0$value)
 
-beanplot(value~group,border = NA,data=gmelt0,side = "both",ll = 0.0001,
-         col = list("blue", c("red", "white")),ylim=c(-4,4))
+#matched$mytype<-rep("matched",nrow(matched))
+#unmatched$mytype<-rep("unmatched",nrow(unmatched))
+#full<-rbind(matched[,c(1,2,3,4,7)],unmatched)
+
+
+#full$bpt  <- revalue(full$bpt ,c("0"="AGN 0","1"="AGN 1"))
+#full$lgm_tot_p50<-round(full$lgm_tot_p50,2)
+#full$sfr_tot_p50<-round(full$sfr_tot_p50,2)
+#full$color_gr<-round(full$color_gr,2)
+
+#write.csv(full,"..//data/full.csv",row.names = FALSE)
+
+#require(beanplot)
+
+#gmelt$group<-paste(gmelt$variable,gmelt$bpt,sep=" ")
+
+#beanplot(value~group,border = NA,data=gmelt,side = "both",ll = 0.0001,
+#         col = list("blue", c("red", "white")),ylim=c(-4,4))
+
+
+
+#gmelt0$group<-paste(gmelt0$variable,gmelt0$bpt,sep=" ")
+#gmelt0$value<-as.numeric(gmelt0$value)
+
+#beanplot(value~group,border = NA,data=gmelt0,side = "both",ll = 0.0001,
+#         col = list("blue", c("red", "white")),ylim=c(-4,4))
