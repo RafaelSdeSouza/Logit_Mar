@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import pandas as pd
+import numpy as np
 import pystan
 import argparse
 from os.path import abspath, join, basename
