@@ -27,7 +27,9 @@ def normalize(df, var):
 # Parsing command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--filename', help='data file name',
-        default='stan_models/logit.stan')
+                    default='stan_models/logit.stan')
+parser.add_argument('-n', '--niter', help='number of iterations',
+                    type=int, default=1000)
 args = parser.parse_args()
 
 # read data into pandas data frame
@@ -50,7 +52,7 @@ data['y'] = df["bpt"].values
 
 # Stan fit
 with open(args.filename) as f:
-    fit = pystan.stan(model_code=f.read(), data=data, iter=200, chains=3)
+    fit = pystan.stan(model_code=f.read(), data=data, iter=args.niter, chains=3)
 
 a = fit.extract(permuted=False)
 
