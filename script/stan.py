@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import pystan
 import argparse
-from os.path import abspath, join, basename
+from os.path import abspath, join, basename, splitext
+import pickle
 
 def normalize(df, var):
     """Normalize variables and uncertainties in place.
@@ -45,6 +46,7 @@ data = {}
 data['n'] = len(df[xvar[0]])
 data['k'] = len(xvar)
 data['x'] = df[xvar].values
+data['y'] = df["bpt"].values
 
 # Stan fit
 with open(args.filename) as f:
