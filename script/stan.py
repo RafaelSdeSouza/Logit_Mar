@@ -30,6 +30,10 @@ parser.add_argument('-f', '--filename', help='data file name',
                     default='stan_models/logit.stan')
 parser.add_argument('-n', '--niter', help='number of iterations',
                     type=int, default=1000)
+parser.add_argument('-x', '--xvar', help='predictor variable(s)',
+                    nargs='+', default=["lgm_tot_p50", "logM200_L"],
+                    choices = ["lgm_tot_p50", "logM200_L", "RprojLW_Rvir",
+                        "sfr_tot_p50", "color_gr"])
 args = parser.parse_args()
 
 # read data into pandas data frame
@@ -37,17 +41,16 @@ datadir = abspath('../data')
 datafile = join(datadir, "matched.txt")
 df = pd.read_csv(datafile, sep=" *", index_col=False)
 
-xvar = ["lgm_tot_p50", "logM200_L", "RprojLW_Rvir", "sfr_tot_p50", "color_gr"]
 
 # Normalize variables
-for v in xvar:
+for v in args.xvar:
     normalize(df, v)
 
 # build data dictionary for stan model
 data = {}
-data['n'] = len(df[xvar[0]])
-data['k'] = len(xvar)
-data['x'] = df[xvar].values
+data['n'] = len(df[args.xvar[0]])
+data['k'] = len(args.xvar)
+data['x'] = df[args.xvar].values
 data['y'] = df["bpt"].values
 
 # Stan fit
