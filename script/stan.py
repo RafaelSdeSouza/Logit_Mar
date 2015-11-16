@@ -33,12 +33,21 @@ datadir = abspath('../data')
 datafile = join(datadir, "matched.txt")
 df = pd.read_csv(datafile, sep=" *", index_col=False)
 
-print(df.columns)
+xvar = ["lgm_tot_p50", "logM200_L", "RprojLW_Rvir", "sfr_tot_p50", "color_gr"]
+
+# Normalize variables
+for v in xvar:
+    normalize(df, v)
+
+# build data dictionary for stan model
+data = {}
+data['n'] = len(df[xvar[0]])
+data['k'] = len(xvar)
+data['x'] = df[xvar].values
 
 # Stan fit
 with open(args.filename) as f:
-    fit = pystan.stan(model_code=f.read(), data=data, iter=args.niter,
-        chains=3, n_jobs=100)
+    fit = pystan.stan(model_code=f.read(), data=data, iter=200, chains=3)
 
 a = fit.extract(permuted=False)
 
