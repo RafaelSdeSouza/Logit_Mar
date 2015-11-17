@@ -34,6 +34,8 @@ parser.add_argument('-x', '--xvar', help='predictor variable(s)',
                     nargs='+', default=["lgm_tot_p50", "logM200_L"],
                     choices = ["lgm_tot_p50", "logM200_L", "RprojLW_Rvir",
                         "sfr_tot_p50", "color_gr"])
+parser.add_argument('-c', '--chains', help='number of chains',
+                    type=int, default=3)
 args = parser.parse_args()
 
 # read data into pandas data frame
@@ -55,11 +57,12 @@ data['y'] = df["bpt"].values
 
 # Stan fit
 with open(args.filename) as f:
-    fit = pystan.stan(model_code=f.read(), data=data, iter=args.niter, chains=3)
+    fit = pystan.stan(model_code=f.read(), data=data, iter=args.niter,
+                    chains=args.chains)
 
 a = fit.extract(permuted=False)
 
 # pickle stan fit object
 with open(join(
     datadir, "{0}.p".format(splitext(basename(args.filename))[0])), "wb") as f:
-    pickle.dump(a, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump([args.xvar, "bpt", a], f, pickle.HIGHEST_PROTOCOL)
