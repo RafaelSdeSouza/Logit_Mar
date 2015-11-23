@@ -27,7 +27,7 @@ PMx<-ggplot(aes(x=x,y=mean),data=gMx_E)+
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
   xlab(expression(log~M[halo]))+ylab(expression(P[AGN]))
-cairo_pdf("P_Mx.pdf",width = 8.75, height = 9)
+cairo_pdf("P_Mx.pdf",width = 9.25, height = 9)
 PMx
 dev.off()
 
@@ -47,7 +47,7 @@ PRx<-ggplot(aes(x=x,y=mean),data=gRx_E)+
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
   xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))
-cairo_pdf("P_Rx.pdf",width = 8.75, height = 9)
+cairo_pdf("P_Rx.pdf",width = 9.25, height = 9)
 PRx
 dev.off()
 
