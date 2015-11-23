@@ -4,25 +4,27 @@ library(pROC)
 require(plyr)
 require(gam)
 library(glmnet)
-data<-read.csv("..//data/Logit_sample-2.csv",header=TRUE,na.strings="")
-data2<-na.omit(data)
-data2<-data2[data2$logMstar>0,]
-data2<-data2[which(data2$vlos_sigma!=Inf),]
-
-#data2$bpt<-as.factor(data2$bpt)
-data2$bpt <- revalue(data2$bpt,c("SF"="0","Composite"="0",
-                               "LINER"="1","Seyfert/LINER"="1",
-                               "Seyfert"="1","BLANK"="0"))
+require(mgcv)
+# Read and format data
+data     <- read.table("..//data/matched.txt",header=TRUE,na.strings="")
+data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
 
 
+# Run for Spirals 
+data_cut   <- subset(data_cut, zoo=="S")
+x1<-data_cut$logM200_L
+x2<-data_cut$RprojLW_Rvir
+y<-data_cut$bpt
+zoo<-as.factor(data_cut$zoo)
+g<-gam(y~s(x2)+s(x1),family=binomial)
+vis.gam(g,theta=-175,color="heat")
+vis.gam(g,se=2,theta=-35,type="response",xlabel=c("oi"))
+
+vis.gam(g, view=c("x1","x2"),plot.type="contour",color="topo")
+plot(fit,pages=1,seWithMean=TRUE)
 
 
-#sSFR<-data$sSFR
-#D1<-densityMclust(sSFR,G=2)
-#plot(D1, what = "density", data = sSFR, breaks = 25)
-#D1$classification
 
-#data$SFR_class<-D1$classification-1
 
 x<-as.matrix(data2[,2:5])
 fit<-glmnet(x,y=data2$bpt,alpha=1,family="binomial")
@@ -39,8 +41,6 @@ index.min = coef.min[active.min]
 
 
 
-
-fit<-gam(bpt~s(logMstar,3)+s(vlos_sigma,3),family=binomial,data=data2)
 
 
 library(popbio)
