@@ -1,45 +1,57 @@
 # Plots for each parameter
 #read data
-
+require(ggplot2)
+require(ggthemes)
+require(Cairo)
 
 gMx_S<-read.table("gMx_S.dat",header=TRUE)
 gMx_E<-read.table("gMx_E.dat",header=TRUE)
-gMx_E$x<-gMx_S$x
-
+#gMx_E$x<-gMx_S$x
+gMx_S$x_o<-gMx_S$x*0.289949+13.86258
+gMx_E$x_o<-gMx_E$x*0.289949+13.86258
 
 gRx_S<-read.table("gRx_S.dat",header=TRUE)
 gRx_E<-read.table("gRx_E.dat",header=TRUE)
-gRx_E$x<-gRx_S$x
+
+gRx_S$x_o<-gRx_S$x*2.061402+2.180115
+gRx_E$x_o<-gRx_E$x*2.061402+2.180115
+
+#gRx_E$x<-gRx_S$x
+
+
+
 
 #b) M_halo
-PMx<-ggplot(aes(x=x,y=mean),data=gMx_E)+
-  geom_ribbon(data=gMx_E,aes(x=x,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8,  fill=c("#E0FFFF")) +
-  geom_ribbon(data=gMx_E,aes(x=x,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7,  fill=c("#00CED1")) +
+PMx<-ggplot(aes(x=x_o,y=mean),data=gMx_S)+
+  geom_ribbon(data=gMx_S,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8,  fill=c("#E0FFFF")) +
+  geom_ribbon(data=gMx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7,  fill=c("#00CED1")) +
   geom_line(size=1,linetype="dashed")+
-   geom_ribbon(data=gMx_S,aes(x=x,y=mean,ymin=lwr2, ymax=upr2), alpha=0.8, fill=c("#fcbba1")) +
-  geom_ribbon(data=gMx_S,aes(x=x,y=mean,ymin=lwr1, ymax=upr1), alpha=0.7, fill=c("#de2d26")) +
-  geom_line(aes(x=x,y=mean),data=gMx_S,size=1,linetype="dashed")+
-  theme_minimal()+
+   geom_ribbon(data=gMx_E,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2), alpha=0.8, fill=c("#fcbba1")) +
+  geom_ribbon(data=gMx_E,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1), alpha=0.7, fill=c("#de2d26")) +
+  geom_line(aes(x=x_o,y=mean),data=gMx_E,size=1,linetype="dotted")+
+  theme_hc()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
         axis.text.y=element_text(size=25),
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(log~M[halo]))+ylab(expression(P[AGN]))
-cairo_pdf("P_Mx.pdf",width = 9.25, height = 9)
+#  xlab(expression(log~M[halo]/M['\u0298']))+
+  xlab(expression(log~M[halo]))+
+  ylab(expression(P[AGN]))
+cairo_pdf("..//figures/P_Mx.pdf",width = 9.25, height = 9)
 PMx
 dev.off()
 
 #c) R_proj
-PRx<-ggplot(aes(x=x,y=mean),data=gRx_E)+
-  geom_ribbon(data=gRx_E,aes(x=x,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8,  fill=c("#E0FFFF")) +
-  geom_ribbon(data=gRx_E,aes(x=x,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7,  fill=c("#00CED1")) +
+PRx<-ggplot(aes(x=x_o,y=mean),data=gRx_S)+
+  geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8,  fill=c("#E0FFFF")) +
+  geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7,  fill=c("#00CED1")) +
   geom_line(size=1,linetype="dashed")+
-  geom_ribbon(data=gRx_S,aes(x=x,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8, fill=c("#fcbba1")) +
-    geom_ribbon(data=gRx_S,aes(x=x,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7, fill=c("#de2d26")) +
-  geom_line(aes(x=x,y=mean),data=gRx_S,size=1,linetype="dashed")+
-  theme_minimal()+
+  geom_ribbon(data=gRx_E,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8, fill=c("#fcbba1")) +
+    geom_ribbon(data=gRx_E,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7, fill=c("#de2d26")) +
+  geom_line(aes(x=x_o,y=mean),data=gRx_E,size=1,linetype="dashed")+
+  theme_hc()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
         axis.text.y=element_text(size=25),
@@ -47,30 +59,26 @@ PRx<-ggplot(aes(x=x,y=mean),data=gRx_E)+
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
   xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))
-cairo_pdf("P_Rx.pdf",width = 9.25, height = 9)
+#+coord_cartesian(xlim=c(0,10))
+CairoPDF("P_Rx.pdf",width = 9.25, height = 9)
 PRx
 dev.off()
 
 
 
-# Plots with ggmcmc
+# Plots beta posteriors
 
-jagssamples <- as.mcmc.list(jags.logit)
+gplot_S<-read.table("gplot_S.dat",header=TRUE)
+gplot_E<-read.table("gplot_E.dat",header=TRUE)
+gplot_S$Parameter<-as.factor(gplot_S$Parameter)
+gplot_E$Parameter<-as.factor(gplot_E$Parameter)
 
-labels<-c(expression(beta[0]),expression(beta[1]),expression(beta[2]),
-          expression(beta[3]),expression(beta[4]),expression(beta[5]),expression(beta[6]))
-L.radon.intercepts <- data.frame(
-  Parameter=paste("beta[", seq(1:7), "]", sep=""),
-  Label=labels)
-head(L.radon.intercepts)
 
-#"lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo"
-G1<-ggs(jagssamples,family="beta")
+gplot<-rbind(gplot_S,gplot_E,deparse.level = 2)
 
-gplot<-G1[,3:4]
-gplot$Parameter<-as.factor(gplot$Parameter)
-pL<-ggplot(data=gplot,aes(x=value,group=Parameter,fill=Parameter))+
-  geom_density(colour="white",size=0.01,alpha=0.8)+facet_grid(Parameter~.,labeller = label_parsed)+
+gplot$gal<-as.factor(gplot$gal)
+pL<-ggplot(data=gplot,aes(x=value,group=Parameter,fill=gal))+
+  geom_density(colour="white",size=0.01,alpha=0.8)+facet_grid(Parameter~gal,labeller = label_parsed)+
   theme_hc()+
   theme(legend.position="none",panel.background = element_rect(fill = "white"),plot.background = element_rect(
     fill = "white"),plot.title = element_text(hjust=0.5),
@@ -81,29 +89,13 @@ pL<-ggplot(data=gplot,aes(x=value,group=Parameter,fill=Parameter))+
     text = element_text(size=22),axis.title.x=element_text(size=rel(1)),strip.background=element_rect(
       fill = "white"),strip.text=element_text(
         size = 25))+
-  #  geom_vline(xintercept=0,linetype="dashed",colour=c("grey80")) +
-  scale_fill_manual(values=c("#E0FFFF","#00CED1","cyan4"))+
+  geom_vline(xintercept=0,size=1,linetype="dashed",colour=c("grey50")) +
+  #  scale_fill_manual(values=c("#E0FFFF","#00CED1","cyan4"))+
+  scale_fill_manual(values=c("#00CED1","#de2d26"))+
   ylab("Density")+xlab("Parameter value")
 
-
-
-
-plotbeta<-ggs_density(G1)+theme_hc()+
-  theme(legend.position="none",plot.title = element_text(hjust=0.5),
-        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=18),
-        axis.text.y=element_text(size=18),
-        strip.text.x=element_text(size=25),
-        axis.title.x=element_text(vjust=-0.25),
-        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  geom_vline(xintercept=0,linetype="dashed",colour=c("grey80")) + scale_fill_manual(values=c("#E0FFFF","#00CED1","cyan4"))
-aes(fill="#034e7b")+
-  ylab("")+
-  scale_y_discrete(breaks=c("beta[1]", "beta[2]", "beta[3]"),
-                   labels=c(expression(beta[1]),expression(beta[2]),expression(beta[3])))
-
-
-CairoPDF("betas.pdf",width = 5, height = 6)
-plotbeta
+CairoPDF("..//figures/beta_E.pdf",width = 8.5, height = 9)
+pL
 dev.off()
 
 
