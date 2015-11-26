@@ -42,8 +42,6 @@ beta.2[j]~dnorm(mu,tau)
 }
 
 
-
-
 #2. Likelihood
 for(i in 1:N){
 Y[i] ~ dbern(pi[i])
