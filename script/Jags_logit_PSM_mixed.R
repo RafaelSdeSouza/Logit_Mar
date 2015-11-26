@@ -31,14 +31,21 @@ jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),Mx=Mx,
 
 ### Prior Specification and Likelihood function
 model<-"model{
+ 
+#0. Hyperprior
+tau ~ dgamma(0.001,0.001)
+mu  ~ dnorm(0,1e-3)
 #1. Priors
 
 #a.Normal 
 for(j in 1:2){
-beta.0[j]~dnorm(0,1e-6)                                    
-beta.1[j]~dnorm(0,1e-6) 
-beta.2[j]~dnorm(0,1e-6) 
+beta.0[j]~dnorm(mu,tau)                                    
+beta.1[j]~dnorm(mu,tau) 
+beta.2[j]~dnorm(mu,tau) 
 }
+
+
+
 
 #2. Likelihood
 for(i in 1:N){
@@ -57,7 +64,7 @@ eta[i] <- beta.0[gal[i]]*X[i,1]+beta.1[gal[i]]*X[i,2]+beta.2[gal[i]]*X[i,3]
 #logit(px[l])<-beta[1]+beta[2]*Mx[l]+beta[3]*Rx[l]
 #             }
              }"
-params <- c("beta","pi","pMx","pRx","px")        # Monitor these parameters.
+params <- c("beta.0","beta.1","beta.2","pi","pMx","pRx","px")        # Monitor these parameters.
 inits0  <- function () {list(beta.0 = rnorm(2,0, 0.01),beta.1 = rnorm(2,0, 0.01),beta.2 = rnorm(2,0, 0.01))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
@@ -124,4 +131,4 @@ gplot$gal<-rep("S",nrow(gplot))
 write.table(gplot,"gplot_S.dat",row.names = F)
 
 
-
+ggs_caterpillar(G1)
