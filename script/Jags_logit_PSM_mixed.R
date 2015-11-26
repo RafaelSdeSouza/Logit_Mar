@@ -10,9 +10,6 @@ data     <- read.table("..//data/matched.txt",header=TRUE,na.strings="")
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
 
 
-# Run for Ellipticals 
-#data_cut   <- subset(data_cut, zoo=="S")
-
 X          <- model.matrix( ~  logM200_L + RprojLW_Rvir, data = data_cut) # Predictors
 K          <- ncol(X)                   # Number of Predictors including the intercept 
 y          <- data_cut$bpt # Response variable (0/1)
@@ -77,7 +74,7 @@ th     = 10     # Thinning value
 jags.logit  <- run.jags(method="rjparallel",data = jags.data,inits = list(inits1,inits2,inits3),model=model,
                        n.chains = nc,adapt=ad,monitor=c(params),burnin=bin,thin=th,sample=s,summarise=FALSE,plots=FALSE)
 
-#beta     <- as.mcmc.list(jags.logit,vars="beta")
+beta     <- as.mcmc.list(jags.logit,vars="beta")
 #pi       <- as.mcmc.list(jags.logit,vars="pi")
 #pMx    <- as.mcmc.list(jags.logit,vars="pMx")
 
@@ -122,6 +119,8 @@ write.table(gRx,"gRx_S.dat",row.names = F)
 write.table(gMx,"gMx_S.dat",row.names = F)
 
 
+
+
 # Plots with ggmcmc
 jagssamples <- as.mcmc.list(jags.logit)
 
@@ -131,4 +130,4 @@ gplot$gal<-rep("S",nrow(gplot))
 write.table(gplot,"gplot_S.dat",row.names = F)
 
 
-ggs_caterpillar(G1)
+
