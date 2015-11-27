@@ -22,8 +22,10 @@ Mx <- seq(2*min(X[,2]),2*max(X[,2]),length.out=300)
 Rx <- seq(2*min(X[,3]),2*max(X[,3]),length.out=300)
 
 
-jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),Mx=Mx,
-                   Rx=Rx,gal=gal)
+#jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),Mx=Mx,
+#                   Rx=Rx,gal=gal)
+
+jags.data  <- list(Y= y,N = n,X=X,Mx=Mx,Rx=Rx,gal=gal)
 # b0 and B0 are the mean vector and the inverse of the covariance matrix of prior distribution of the regression coefficients
 
 ### Prior Specification and Likelihood function
@@ -68,7 +70,7 @@ logit(pxS[l])<-beta[1,2]+beta[2,2]*Mx[l]+beta[3,2]*Rx[l]
              }
              }"
 params <- c("beta","pi","pMxS","pRxS","pxS","pMxE","pRxE","pxE")        # Monitor these parameters.
-inits0  <- function () {list(beta.0 = rnorm(2,0, 0.01),beta.1 = rnorm(2,0, 0.01),beta.2 = rnorm(2,0, 0.01))} # A function to generat initial values for mcmc
+inits0  <- function () {list(beta = matrix(rnorm(6,0, 0.01),ncol=2))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
 # Run mcmc
