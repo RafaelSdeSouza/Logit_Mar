@@ -52,7 +52,7 @@ eta[i] <- beta[1,gal[i]]*X[i,1]+beta[2,gal[i]]*X[i,2]+beta[3,gal[i]]*X[i,3]
 }
 #3.Probability for each variable 
 # 
-#for(l in 1:300){
+for(l in 1:300){
 
 #a. Ellipticals
 
@@ -67,7 +67,7 @@ logit(pRxS[l])<-beta[1,2]+beta[3,2]*Rx[l]
 logit(pxS[l])<-beta[1,2]+beta[2,2]*Mx[l]+beta[3,2]*Rx[l]
              }
              }"
-params <- c("beta","pi","pMx","pRx","px")        # Monitor these parameters.
+params <- c("beta","pi","pMxS","pRxS","pxS","pMxE","pRxE","pxE")        # Monitor these parameters.
 inits0  <- function () {list(beta.0 = rnorm(2,0, 0.01),beta.1 = rnorm(2,0, 0.01),beta.2 = rnorm(2,0, 0.01))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
@@ -84,35 +84,36 @@ jags.logit  <- run.jags(method="rjparallel",data = jags.data,inits = list(inits1
 
 
 #-----------##-----------#-----------##-----------
-pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
-pi_Rx<-pi_Rx$quantiles
-gRx<-data.frame(x=Rx,mean=pi_Rx[,3],lwr1=pi_Rx[,2],lwr2=pi_Rx[,1],upr1=pi_Rx[,4],upr2=pi_Rx[,5])
+pi_RxE<-summary(as.mcmc.list(jags.logit, vars="pRxE"))
+pi_RxE<-pi_RxE$quantiles
+gRxE<-data.frame(x=Rx,mean=pi_RxE[,3],lwr1=pi_RxE[,2],lwr2=pi_RxE[,1],upr1=pi_RxE[,4],upr2=pi_RxE[,5])
 
 #-----------##
-pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
-pi_Rx<-pi_Rx$quantiles
-gRx<-data.frame(x=Rx,mean=pi_Rx[,3],lwr1=pi_Rx[,2],lwr2=pi_Rx[,1],upr1=pi_Rx[,4],upr2=pi_Rx[,5])
+pi_RxS<-summary(as.mcmc.list(jags.logit, vars="pRxS"))
+pi_RxS<-pi_RxS$quantiles
+gRxS<-data.frame(x=Rx,mean=pi_RxS[,3],lwr1=pi_RxS[,2],lwr2=pi_RxS[,1],upr1=pi_RxS[,4],upr2=pi_RxS[,5])
 #-----------##-----------#-----------##-----------
 
 
 
 
 #-----------##-----------#-----------##-----------
-pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
-pi_Mx<-pi_Mx$quantiles
-gMx<-data.frame(x=Mx,mean=pi_Mx[,3],lwr1=pi_Mx[,2],lwr2=pi_Mx[,1],upr1=pi_Mx[,4],upr2=pi_Mx[,5])
+pi_MxE<-summary(as.mcmc.list(jags.logit, vars="pMxE"))
+pi_MxE<-pi_MxE$quantiles
+gMxE<-data.frame(x=Mx,mean=pi_MxE[,3],lwr1=pi_MxE[,2],lwr2=pi_MxE[,1],upr1=pi_MxE[,4],upr2=pi_MxE[,5])
 
 #-----------##
-pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
-pi_Mx<-pi_Mx$quantiles
-gMx<-data.frame(x=Mx,mean=pi_Mx[,3],lwr1=pi_Mx[,2],lwr2=pi_Mx[,1],upr1=pi_Mx[,4],upr2=pi_Mx[,5])
+pi_MxS<-summary(as.mcmc.list(jags.logit, vars="pMxS"))
+pi_MxS<-pi_MxS$quantiles
+gMxS<-data.frame(x=Mx,mean=pi_MxS[,3],lwr1=pi_MxS[,2],lwr2=pi_MxS[,1],upr1=pi_MxS[,4],upr2=pi_MxS[,5])
 #-----------##-----------#-----------##-----------
 
 
 
-write.table(gRx,"gRx_S.dat",row.names = F)
-write.table(gMx,"gMx_S.dat",row.names = F)
-
+write.table(gRxS,"..//data/gRx_S.dat",row.names = F)
+write.table(gRxS,"..//data/gRx_E.dat",row.names = F)
+write.table(gMxS,"..//data/gMx_S.dat",row.names = F)
+write.table(gMxS,"..//data/gMx_E.dat",row.names = F)
 
 # Plots with ggmcmc
 jagssamples <- as.mcmc.list(jags.logit)
@@ -123,7 +124,9 @@ gplot$gal<-rep(c("E","S"),each=nrow(gplot)/2)
 write.table(gplot,"gplot.dat",row.names = F)
 
 
-ggs_density(G1)
+
+
+#ggs_density(G1)
 
 
 # Trace plots and diagnostic analysis to investigate convregence
