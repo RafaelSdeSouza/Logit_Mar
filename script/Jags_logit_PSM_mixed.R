@@ -32,34 +32,42 @@ model<-"model{
 #0. Hyperprior
 tau ~ dgamma(0.001,0.001)
 mu  ~ dnorm(0,1e-3)
+
 #1. Priors
 
 #a.Normal 
 for(j in 1:2){
-beta.0[j]~dnorm(mu,tau)                                    
-beta.1[j]~dnorm(mu,tau) 
-beta.2[j]~dnorm(mu,tau) 
+for(k in 1:3){
+beta[k,j]~dnorm(mu,tau)                                    
 }
-
+}
 
 #2. Likelihood
 for(i in 1:N){
+
 Y[i] ~ dbern(pi[i])
 logit(pi[i]) <-  eta[i]
-#eta[i] <- inprod(beta[gal[i]], X[i,])
-eta[i] <- beta.0[gal[i]]*X[i,1]+beta.1[gal[i]]*X[i,2]+beta.2[gal[i]]*X[i,3]
-}
+eta[i] <- beta[1,gal[i]]*X[i,1]+beta[2,gal[i]]*X[i,2]+beta[3,gal[i]]*X[i,3]
 
+}
 #3.Probability for each variable 
 # 
 #for(l in 1:300){
 
-#logit(pMx[l])<-beta[1]+beta[2]*Mx[l]
-#logit(pRx[l])<-beta[1]+beta[3]*Rx[l]
-#logit(px[l])<-beta[1]+beta[2]*Mx[l]+beta[3]*Rx[l]
-#             }
+#a. Ellipticals
+
+logit(pMxE[l])<-beta[1,1]+beta[2,1]*Mx[l]
+logit(pRxE[l])<-beta[1,1]+beta[3,1]*Rx[l]
+logit(pxE[l])<-beta[1,1]+beta[2,1]*Mx[l]+beta[3,1]*Rx[l]
+
+#b. Spirals 
+
+logit(pMxS[l])<-beta[1,2]+beta[2,2]*Mx[l]
+logit(pRxS[l])<-beta[1,2]+beta[3,2]*Rx[l]
+logit(pxS[l])<-beta[1,2]+beta[2,2]*Mx[l]+beta[3,2]*Rx[l]
+             }
              }"
-params <- c("beta.0","beta.1","beta.2","pi","pMx","pRx","px")        # Monitor these parameters.
+params <- c("beta","pi","pMx","pRx","px")        # Monitor these parameters.
 inits0  <- function () {list(beta.0 = rnorm(2,0, 0.01),beta.1 = rnorm(2,0, 0.01),beta.2 = rnorm(2,0, 0.01))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
@@ -72,9 +80,51 @@ th     = 10     # Thinning value
 jags.logit  <- run.jags(method="rjparallel",data = jags.data,inits = list(inits1,inits2,inits3),model=model,
                        n.chains = nc,adapt=ad,monitor=c(params),burnin=bin,thin=th,sample=s,summarise=FALSE,plots=FALSE)
 
-beta     <- as.mcmc.list(jags.logit,vars="beta")
-#pi       <- as.mcmc.list(jags.logit,vars="pi")
-#pMx    <- as.mcmc.list(jags.logit,vars="pMx")
+
+
+
+#-----------##-----------#-----------##-----------
+pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
+pi_Rx<-pi_Rx$quantiles
+gRx<-data.frame(x=Rx,mean=pi_Rx[,3],lwr1=pi_Rx[,2],lwr2=pi_Rx[,1],upr1=pi_Rx[,4],upr2=pi_Rx[,5])
+
+#-----------##
+pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
+pi_Rx<-pi_Rx$quantiles
+gRx<-data.frame(x=Rx,mean=pi_Rx[,3],lwr1=pi_Rx[,2],lwr2=pi_Rx[,1],upr1=pi_Rx[,4],upr2=pi_Rx[,5])
+#-----------##-----------#-----------##-----------
+
+
+
+
+#-----------##-----------#-----------##-----------
+pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
+pi_Mx<-pi_Mx$quantiles
+gMx<-data.frame(x=Mx,mean=pi_Mx[,3],lwr1=pi_Mx[,2],lwr2=pi_Mx[,1],upr1=pi_Mx[,4],upr2=pi_Mx[,5])
+
+#-----------##
+pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
+pi_Mx<-pi_Mx$quantiles
+gMx<-data.frame(x=Mx,mean=pi_Mx[,3],lwr1=pi_Mx[,2],lwr2=pi_Mx[,1],upr1=pi_Mx[,4],upr2=pi_Mx[,5])
+#-----------##-----------#-----------##-----------
+
+
+
+write.table(gRx,"gRx_S.dat",row.names = F)
+write.table(gMx,"gMx_S.dat",row.names = F)
+
+
+# Plots with ggmcmc
+jagssamples <- as.mcmc.list(jags.logit)
+
+G1<-ggs(jagssamples,family="beta")
+gplot<-G1[,3:4]
+gplot$gal<-rep(c("E","S"),each=nrow(gplot)/2)
+write.table(gplot,"gplot.dat",row.names = F)
+
+
+ggs_density(G1)
+
 
 # Trace plots and diagnostic analysis to investigate convregence
 #plot(beta) 
@@ -97,35 +147,6 @@ beta     <- as.mcmc.list(jags.logit,vars="beta")
 
 #gdata<-data.frame(x=data_n2$sfr_tot_p50,mean=pi_AGN[,3],lwr1=pi_AGN[,2],lwr2=pi_AGN[,1],upr1=pi_AGN[,4],upr2=pi_AGN[,5])
 
-
-
-#-----------##-----------#-----------##-----------
-pi_Rx<-summary(as.mcmc.list(jags.logit, vars="pRx"))
-pi_Rx<-pi_Rx$quantiles
-gRx<-data.frame(x=Rx,mean=pi_Rx[,3],lwr1=pi_Rx[,2],lwr2=pi_Rx[,1],upr1=pi_Rx[,4],upr2=pi_Rx[,5])
-#-----------##-----------#-----------##-----------
-
-#-----------##-----------#-----------##-----------
-pi_Mx<-summary(as.mcmc.list(jags.logit, vars="pMx"))
-pi_Mx<-pi_Mx$quantiles
-gMx<-data.frame(x=Mx,mean=pi_Mx[,3],lwr1=pi_Mx[,2],lwr2=pi_Mx[,1],upr1=pi_Mx[,4],upr2=pi_Mx[,5])
-#-----------##-----------#-----------##-----------
-
-
-
-write.table(gRx,"gRx_S.dat",row.names = F)
-write.table(gMx,"gMx_S.dat",row.names = F)
-
-
-
-
-# Plots with ggmcmc
-jagssamples <- as.mcmc.list(jags.logit)
-
-G1<-ggs(jagssamples,family="beta")
-gplot<-G1[,3:4]
-gplot$gal<-rep("S",nrow(gplot))
-write.table(gplot,"gplot_S.dat",row.names = F)
 
 
 
