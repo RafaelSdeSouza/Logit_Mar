@@ -113,9 +113,9 @@ gMxS<-data.frame(x=Mx,mean=pi_MxS[,3],lwr1=pi_MxS[,2],lwr2=pi_MxS[,1],upr1=pi_Mx
 
 
 write.table(gRxS,"..//data/gRx_S.dat",row.names = F)
-write.table(gRxS,"..//data/gRx_E.dat",row.names = F)
+write.table(gRxE,"..//data/gRx_E.dat",row.names = F)
 write.table(gMxS,"..//data/gMx_S.dat",row.names = F)
-write.table(gMxS,"..//data/gMx_E.dat",row.names = F)
+write.table(gMxE,"..//data/gMx_E.dat",row.names = F)
 
 # Plots with ggmcmc
 jagssamples <- as.mcmc.list(jags.logit)

@@ -5,14 +5,14 @@ require(ggthemes)
 require(Cairo)
 require(plyr)
 
-gMx_S<-read.table("gMx_S.dat",header=TRUE)
-gMx_E<-read.table("gMx_E.dat",header=TRUE)
+gMx_S<-read.table("..//data/gMx_S.dat",header=TRUE)
+gMx_E<-read.table("..//data/gMx_E.dat",header=TRUE)
 #gMx_E$x<-gMx_S$x
 gMx_S$x_o<-gMx_S$x*0.289949+13.86258
 gMx_E$x_o<-gMx_E$x*0.289949+13.86258
 
-gRx_S<-read.table("gRx_S.dat",header=TRUE)
-gRx_E<-read.table("gRx_E.dat",header=TRUE)
+gRx_S<-read.table("..//data/gRx_S.dat",header=TRUE)
+gRx_E<-read.table("..//data/gRx_E.dat",header=TRUE)
 
 gRx_S$x_o<-gRx_S$x*2.061402+2.180115
 gRx_E$x_o<-gRx_E$x*2.061402+2.180115
@@ -40,7 +40,7 @@ PMx<-ggplot(aes(x=x_o,y=mean),data=gMx_S)+
 #  xlab(expression(log~M[halo]/M['\u0298']))+
   xlab(expression(log~M[halo]))+
   ylab(expression(P[AGN]))
-cairo_pdf("..//figures/P_Mx.pdf",width = 9.25, height = 9)
+CairoPDF("..//figures/P_Mx.pdf",width = 9.25, height = 9)
 PMx
 dev.off()
 
@@ -61,7 +61,7 @@ PRx<-ggplot(aes(x=x_o,y=mean),data=gRx_S)+
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
   xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))
 #+coord_cartesian(xlim=c(0,10))
-CairoPDF("P_Rx.pdf",width = 9.25, height = 9)
+CairoPDF("..//figures/P_Rx.pdf",width = 9.25, height = 9)
 PRx
 dev.off()
 
