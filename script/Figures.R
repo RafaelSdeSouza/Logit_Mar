@@ -17,6 +17,9 @@ gRx_E<-read.table("..//data/gRx_E.dat",header=TRUE)
 gRx_S$x_o<-gRx_S$x*2.061402+2.180115
 gRx_E$x_o<-gRx_E$x*2.061402+2.180115
 
+
+
+
 #gRx_E$x<-gRx_S$x
 
 
