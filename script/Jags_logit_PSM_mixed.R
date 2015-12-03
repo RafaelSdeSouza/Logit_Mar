@@ -6,7 +6,9 @@ cl       <- makeCluster(3) # For parallel computing
 
 source("facet_wrap_labeller.R")
 # Read and format data
-data     <- read.table("..//data/matched.txt",header=TRUE,na.strings="")
+dataE     <- read.table("..//data/matched_E.txt",header=TRUE,na.strings="")
+dataS     <- read.table("..//data/matched_S.txt",header=TRUE,na.strings="")
+data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
 
 
@@ -18,8 +20,8 @@ gal        <- as.numeric(data_cut$zoo)
 
 # Grid of values for prediction 
 
-Mx <- seq(2*min(X[,2]),2*max(X[,2]),length.out=300)
-Rx <- seq(2*min(X[,3]),2*max(X[,3]),length.out=300)
+Mx <- seq(1.05*min(X[,2]),1.05*max(X[,2]),length.out=300)
+Rx <- seq(1.05*min(X[,3]),1.05*max(X[,3]),length.out=300)
 
 
 #jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),Mx=Mx,
