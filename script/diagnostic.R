@@ -7,7 +7,10 @@ require(sjPlot)
 require(ggplot2)
 require(ggthemes)
 require(gam)
-data     <- read.table("..//data/matched.txt",header=TRUE,na.strings="")
+# Read and format data
+dataE     <- read.table("..//data/matched_E.txt",header=TRUE,na.strings="")
+dataS     <- read.table("..//data/matched_S.txt",header=TRUE,na.strings="")
+data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
 data_cut   <- subset(data_cut, zoo == "E")
 
