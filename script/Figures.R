@@ -42,7 +42,7 @@ PMx<-ggplot(aes(x=x_o,y=mean),data=gMx_S)+
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
 #  xlab(expression(log~M[halo]/M['\u0298']))+
   xlab(expression(log~M[halo]))+
-  ylab(expression(P[AGN]))
+  ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.2,0.8))
 CairoPDF("..//figures/P_Mx.pdf",width = 9.25, height = 9)
 PMx
 dev.off()
@@ -62,7 +62,7 @@ PRx<-ggplot(aes(x=x_o,y=mean),data=gRx_S)+
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))
+  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.2,0.8))
 #+coord_cartesian(xlim=c(0,10))
 CairoPDF("..//figures/P_Rx.pdf",width = 9.25, height = 9)
 PRx
