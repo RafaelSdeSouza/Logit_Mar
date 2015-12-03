@@ -12,7 +12,7 @@ dataE     <- read.table("..//data/matched_E.txt",header=TRUE,na.strings="")
 dataS     <- read.table("..//data/matched_S.txt",header=TRUE,na.strings="")
 data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
-data_cut   <- subset(data_cut, zoo == "E")
+data_cut   <- subset(data_cut, zoo == "S")
 
 
 mod1<- glm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial("logit"),data=data_cut)
@@ -31,13 +31,13 @@ segments(seq(0.05, 0.95, by=0.1), means-2*means.se,
          seq(0.05, 0.95,by=0.1), means+2*means.se,lwd=2, col="orange")
 
 
-gdata<-data.frame(fit=fitted(mod),obs=data_cut$bpt)
-xrange<-range(fitted(mod))
+gdata<-data.frame(fit=fitted(mod1),obs=data_cut$bpt)
+xrange<-range(fitted(mod1))
 
 bined<-data.frame(x=seq(0.05, 0.95, by=0.1),y=means)
 
 
-ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position = position_jitter (h = 0.05))+
+ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position = position_jitter (h = 0.025))+
   geom_point(aes(x=x,y=y),size=3,data=bined,colour="#de2d26")+
   geom_errorbar(data=bined,guide="none",aes(x=x,y=y,ymin=y-2*means.se,ymax=y+2*means.se),alpha=0.7,
                 colour="#de2d26",width=0.005)+
@@ -46,7 +46,7 @@ ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position 
                                   axis.title.y=element_text(vjust=0.75),
                                   axis.title.x=element_text(vjust=-0.25),
                                   text = element_text(size=25))+xlab("Predicted  AGN fraction")+
-  ylab("Observed AGN Fraction")
+  ylab("Observed AGN Fraction")+coord_cartesian(ylim=c(-0.1,1.1),xlim=c(0.4,0.6))
 
 
 
