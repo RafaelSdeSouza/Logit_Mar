@@ -26,10 +26,11 @@ gRx_E$x_o<-gRx_E$x*2.061402+2.180115
 
 
 #b) M_halo
-PMx<-ggplot(aes(x=x_o,y=mean),data=gMx_S)+
+#PMx<-
+  ggplot(aes(x=x_o,y=mean),data=gMx_S)+
   geom_ribbon(data=gMx_S,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8,  fill=c("#E0FFFF")) +
   geom_ribbon(data=gMx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7,  fill=c("#00CED1")) +
-  geom_line(size=1,linetype="dashed")+
+  geom_line(size=1,linetype="dotted")+
    geom_ribbon(data=gMx_E,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2), alpha=0.8, fill=c("#fcbba1")) +
   geom_ribbon(data=gMx_E,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1), alpha=0.7, fill=c("#de2d26")) +
   geom_line(aes(x=x_o,y=mean),data=gMx_E,size=1,linetype="dotted")+
@@ -42,13 +43,16 @@ PMx<-ggplot(aes(x=x_o,y=mean),data=gMx_S)+
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
 #  xlab(expression(log~M[halo]/M['\u0298']))+
   xlab(expression(log~M[halo]))+
-  ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.2,0.8))
-CairoPDF("..//figures/P_Mx.pdf",width = 9.25, height = 9)
-PMx
-dev.off()
+  ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.15,0.85))
+quartz.save(type = 'pdf', file = '..//figures/P_Mx.pdf',width = 9.5, height = 9)
+
+#cairo_pdf("..//figures/P_Mx.pdf",width = 9.25, height = 9)
+#PMx
+#dev.off()
 
 #c) R_proj
-PRx<-ggplot(aes(x=x_o,y=mean),data=gRx_S)+
+#PRx<-
+  ggplot(aes(x=x_o,y=mean),data=gRx_S)+
   geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8,  fill=c("#E0FFFF")) +
   geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7,  fill=c("#00CED1")) +
   geom_line(size=1,linetype="dashed")+
@@ -62,11 +66,13 @@ PRx<-ggplot(aes(x=x_o,y=mean),data=gRx_S)+
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.2,0.8))
+  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.15,0.85))
 #+coord_cartesian(xlim=c(0,10))
-CairoPDF("..//figures/P_Rx.pdf",width = 9.25, height = 9)
-PRx
-dev.off()
+
+quartz.save(type = 'pdf', file = '..//figures/P_Rx.pdf',width = 9.5, height = 9)
+#CairoPDF("..//figures/P_Rx.pdf",width = 9.25, height = 9)
+#PRx
+#dev.off()
 
 
 
