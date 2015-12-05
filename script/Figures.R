@@ -59,7 +59,7 @@ quartz.save(type = 'pdf', file = '..//figures/P_Mx.pdf',width = 9.5, height = 9)
   geom_ribbon(data=gRx_E,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.8, fill=c("#fcbba1")) +
     geom_ribbon(data=gRx_E,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.7, fill=c("#de2d26")) +
   geom_line(aes(x=x_o,y=mean),data=gRx_E,size=1,linetype="dashed")+
-  theme_hc()+
+  theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
         axis.text.y=element_text(size=25),
@@ -78,13 +78,13 @@ quartz.save(type = 'pdf', file = '..//figures/P_Rx.pdf',width = 9.5, height = 9)
 
 # Plots beta posteriors
 
-gplot_S<-read.table("gplot_S.dat",header=TRUE)
-gplot_E<-read.table("gplot_E.dat",header=TRUE)
-gplot_S$Parameter<-as.factor(gplot_S$Parameter)
-gplot_E$Parameter<-as.factor(gplot_E$Parameter)
+#gplot_S<-read.table("gplot_S.dat",header=TRUE)
+#gplot_E<-read.table("gplot_E.dat",header=TRUE)
+#gplot_S$Parameter<-as.factor(gplot_S$Parameter)
+#gplot_E$Parameter<-as.factor(gplot_E$Parameter)
 
 
-gplot<-rbind(gplot_S,gplot_E,deparse.level = 2)
+#gplot<-rbind(gplot_S,gplot_E,deparse.level = 2)
 gplot<-read.table("gplot.dat",header=TRUE)
 
 gplot$gal<-as.factor(gplot$gal)
@@ -92,7 +92,7 @@ gplot$gal<-as.factor(gplot$gal)
 gplot$Parameter<-revalue(gplot$Parameter, c("beta[1,1]"= "beta[1]","beta[1,2]"="beta[1]", "beta[2,1]" ="beta[2]", "beta[2,2]"="beta[2]", "beta[3,1]"="beta[3]",
              "beta[3,2]"="beta[3]"))
 
-gplot$Parameter<-revalue()
+
 pL<-ggplot(data=gplot,aes(x=value,group=gal,fill=gal))+
   geom_density(colour="white",size=0.01,alpha=0.8)+facet_grid(Parameter~gal,labeller = label_parsed)+
   theme_bw()+
@@ -110,9 +110,12 @@ pL<-ggplot(data=gplot,aes(x=value,group=gal,fill=gal))+
   scale_fill_manual(values=c("#de2d26","#00CED1"))+
   ylab("Density")+xlab("Parameter value")
 
-CairoPDF("..//figures/betas.pdf",width = 8.5, height = 9)
-pL
-dev.off()
+
+quartz.save(type = 'pdf', file = '..//figures/betas.pdf',width = 8.5, height = 9)
+
+#CairoPDF("..//figures/betas.pdf",width = 8.5, height = 9)
+#pL
+#dev.off()
 
 
 
