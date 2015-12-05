@@ -34,7 +34,7 @@ gRx_E$x_o<-gRx_E$x*2.061402+2.180115
    geom_ribbon(data=gMx_E,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2), alpha=0.8, fill=c("#fcbba1")) +
   geom_ribbon(data=gMx_E,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1), alpha=0.7, fill=c("#de2d26")) +
   geom_line(aes(x=x_o,y=mean),data=gMx_E,size=1,linetype="dotted")+
-  theme_hc()+
+  theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
         axis.text.y=element_text(size=25),

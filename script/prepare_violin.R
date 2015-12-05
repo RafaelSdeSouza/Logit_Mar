@@ -46,12 +46,14 @@ full<-rbind(unmatched,matched,deparse.level=2)
 colnames(full)<-c("AGN","lgm_tot_p50","sfr_tot_p50","color_gr","Galaxy","type")
 full$AGN<-revalue(full$AGN,c("1"="Yes","0"="No"))
 
-full_E
-full_S
+full_E<-subset(full, Galaxy=="E")
+full_S<-subset(full, Galaxy=="S")
 
 
 
-write.csv(full,"..//data/full2.csv")
+write.csv(full_E,"..//data/full_E.csv")
+
+write.csv(full_S,"..//data/full_S.csv")
 
 #gmelt0<-melt(unmatched, id.vars = c('bpt'))
 
