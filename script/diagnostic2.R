@@ -7,18 +7,20 @@ require(sjPlot)
 require(ggplot2)
 require(ggthemes)
 require(gam)
+require(arm)
 dataE     <- read.table("..//data/matched_E.txt",header=TRUE,na.strings="")
 dataS     <- read.table("..//data/matched_S.txt",header=TRUE,na.strings="")
 data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
-data_cut   <- subset(data_cut, zoo == "E")
+data_cut   <- subset(data_cut, zoo == "S")
 
 
-mod1<- glm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut)
-
+mod1<- bayesglm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut)
+BIC<-BIC(mod1)  
+BIC0<-BIC(bayesglm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut))
 
 # GoF Visual 
-t.breaks <-cut(fitted(mod1), seq(0,1, by=0.1))
+t.breaks <-cut(fitted(mod1), seq(0,1, by=0.01))
 means <-tapply(data_cut$bpt, t.breaks, mean)
 semean <-function(x) sd(x)/sqrt(length(x))
 means.se <-tapply(data_cut$bpt, t.breaks, semean)
@@ -29,7 +31,7 @@ y<-data_cut$bpt
 #semean <-function(x) sd(x)/sqrt(length(x))
 gdata<-data.frame(fit=fitted(mod1),obs=y)
 xrange<-range(fitted(mod1))
-bined<-data.frame(x=seq(0.05, 0.95, by=0.1),y=means)
+bined<-data.frame(x=seq(0.01,1, by=0.01),y=means)
 ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position = position_jitter (h = 0.05))+
   geom_point(aes(x=x,y=y),size=3,data=bined,colour="#de2d26")+
   geom_errorbar(data=bined,guide="none",aes(x=x,y=y,ymin=y-2*means.se,ymax=y+2*means.se),alpha=0.7,
@@ -39,10 +41,13 @@ ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position 
                                   axis.title.y=element_text(vjust=0.75),
                                   axis.title.x=element_text(vjust=-0.25),
                                   text = element_text(size=25))+xlab("Predicted  AGN fraction")+
-  ylab("Observed AGN Fraction")
+  ylab("Observed AGN Fraction")+
+  annotate("text",color="#de2d26",size=6,label=paste("This model: BIC = ",round(BIC),sep=""),x=0.475,y=0.2,hjust = 0)+
+  annotate("text",color="gray60",size=6,label=paste("Intercept only: BIC = ",round(BIC0),sep=""),x=0.475,y=0.25,hjust = 0)+
+  coord_cartesian(xlim=c(0.425,0.575))
 
 
-quartz.save(type = 'pdf', file = '..//figures/GoF.pdf',width = 9.5, height = 9)
+quartz.save(type = 'pdf', file = '..//figures/GoF_S.pdf',width = 9.5, height = 9)
 
 
 
@@ -54,13 +59,19 @@ ROCtest(mod1)
 
 
 require(LogisticDx)
-gof(mod1)
+GOF<-gof(mod1)
 
 residuals(mod1, "pearson") 
 
 E1 <- resid(mod1,type="pearson")
 sum(E1^2)/(mod1$df.residual)
-drop1(mod1,test="Chi")
+
+mod0<- bayesglm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut)
+mod1 <-glm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut)
+PseudoR2(mod1)
+PseudoR2(mod0)
+
+
 
 plot(predict(mod1),residuals(mod1),col=c("blue","red")[1+data_cut$bpt])
  abline(h=0,lty=2,col="grey")
