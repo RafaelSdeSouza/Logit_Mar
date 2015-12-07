@@ -1,38 +1,36 @@
-require(rstan)
-require(lme4)
-require(glmer2stan)
-require(sjmisc)
 require(binomTools)
-require(sjPlot)
 require(ggplot2)
 require(ggthemes)
-require(gam)
 require(arm)
 dataE     <- read.table("..//data/matched_E.txt",header=TRUE,na.strings="")
 dataS     <- read.table("..//data/matched_S.txt",header=TRUE,na.strings="")
 data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
-data_cut   <- subset(data_cut, zoo == "S")
 
 
-mod1<- bayesglm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut)
+
+
+data_cut_E   <- subset(data_cut, zoo == "E")
+mod1<- bayesglm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut_E)
 BIC<-BIC(mod1)  
-BIC0<-BIC(bayesglm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut))
+BIC0<-BIC(bayesglm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut_E))
 
 # GoF Visual 
-t.breaks <-cut(fitted(mod1), seq(0,1, by=0.01))
-means <-tapply(data_cut$bpt, t.breaks, mean)
+binagem<-0.1
+
+t.breaks <-cut(fitted(mod1), seq(0,1, by=binagem))
+means <-tapply(data_cut_E$bpt, t.breaks, mean)
 semean <-function(x) sd(x)/sqrt(length(x))
-means.se <-tapply(data_cut$bpt, t.breaks, semean)
-y<-data_cut$bpt
+means.se <-tapply(data_cut_E$bpt, t.breaks, semean)
+y<-data_cut_E$bpt
 #points(seq(0.05, 0.95, by=0.1), means, pch=16, col="orange")
 #segments(seq(0.05, 0.95, by=0.1), means-2*means.se,
 #         seq(0.05, 0.95,by=0.1), means+2*means.se,lwd=2, col="orange")
 #semean <-function(x) sd(x)/sqrt(length(x))
 gdata<-data.frame(fit=fitted(mod1),obs=y)
 xrange<-range(fitted(mod1))
-bined<-data.frame(x=seq(0.01,1, by=0.01),y=means)
-ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position = position_jitter (h = 0.05))+
+bined<-data.frame(x=seq(binagem,1, by=binagem),y=means)
+ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position = position_jitter (h = 0.025))+
   geom_point(aes(x=x,y=y),size=3,data=bined,colour="#de2d26")+
   geom_errorbar(data=bined,guide="none",aes(x=x,y=y,ymin=y-2*means.se,ymax=y+2*means.se),alpha=0.7,
                 colour="#de2d26",width=0.005)+
@@ -42,14 +40,51 @@ ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position 
                                   axis.title.x=element_text(vjust=-0.25),
                                   text = element_text(size=25))+xlab("Predicted  AGN fraction")+
   ylab("Observed AGN Fraction")+
-  annotate("text",color="#de2d26",size=6,label=paste("This model: BIC = ",round(BIC),sep=""),x=0.475,y=0.2,hjust = 0)+
-  annotate("text",color="gray60",size=6,label=paste("Intercept only: BIC = ",round(BIC0),sep=""),x=0.475,y=0.25,hjust = 0)+
-  coord_cartesian(xlim=c(0.425,0.575))
+  annotate("text",color="#de2d26",size=5,label=paste("This model: BIC = ",round(BIC,1),sep=""),x=0.65,y=0.2,hjust = 0)+
+  annotate("text",color="gray60",size=5,label=paste("Intercept only: BIC = ",round(BIC0,1),sep=""),x=0.65,y=0.25,hjust = 0)+
+  coord_cartesian(xlim=c(0.25,0.85),ylim=c(-0.1,1.1))
 
 
-quartz.save(type = 'pdf', file = '..//figures/GoF_S.pdf',width = 9.5, height = 9)
+quartz.save(type = 'pdf', file = '..//figures/GoF_E.pdf',width = 9, height = 8)
 
 
+
+
+data_cut_S   <- subset(data_cut, zoo == "S")
+mod2<- bayesglm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut_S)
+BIC<-BIC(mod2)  
+BIC0<-BIC(bayesglm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut_S))
+
+# GoF Visual 
+binagem2<-0.005
+t.breaks <-cut(fitted(mod2), seq(0,1, by=binagem2))
+means <-tapply(data_cut_S$bpt, t.breaks, mean)
+semean <-function(x) sd(x)/sqrt(length(x))
+means.se <-tapply(data_cut_S$bpt, t.breaks, semean)
+y<-data_cut_S$bpt
+#points(seq(0.05, 0.95, by=0.1), means, pch=16, col="orange")
+#segments(seq(0.05, 0.95, by=0.1), means-2*means.se,
+#         seq(0.05, 0.95,by=0.1), means+2*means.se,lwd=2, col="orange")
+#semean <-function(x) sd(x)/sqrt(length(x))
+gdata<-data.frame(fit=fitted(mod2),obs=y)
+xrange<-range(fitted(mod2))
+bined<-data.frame(x=seq(binagem2,1, by=binagem2),y=means)
+ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position = position_jitter (h = 0.025))+
+  geom_point(aes(x=x,y=y),size=3,data=bined,colour="#de2d26")+
+  geom_errorbar(data=bined,guide="none",aes(x=x,y=y,ymin=y-2*means.se,ymax=y+2*means.se),alpha=0.7,
+                colour="#de2d26",width=0.005)+
+  geom_abline(size=1.5,intercept = 0, slope = 1,linetype="dashed",colour="gray65")+coord_cartesian(xlim=c(0.75*xrange[1],1.1*xrange[2]))+
+  theme_bw()+theme(legend.position="top",plot.title = element_text(hjust=0.5),
+                   axis.title.y=element_text(vjust=0.75),
+                   axis.title.x=element_text(vjust=-0.25),
+                   text = element_text(size=25))+xlab("Predicted  AGN fraction")+
+  ylab("Observed AGN Fraction")+
+  annotate("text",color="#de2d26",size=5,label=paste("This model: BIC = ",round(BIC,1),sep=""),x=0.505,y=0.2,hjust = 0)+
+  annotate("text",color="gray60",size=5,label=paste("Intercept only: BIC = ",round(BIC0,1),sep=""),x=0.505,y=0.25,hjust = 0)+
+  coord_cartesian(xlim=c(0.479,0.519),ylim=c(-0.1,1.1))
+
+
+quartz.save(type = 'pdf', file = '..//figures/GoF_S.pdf',width = 9, height = 8)
 
 
 # ROC curve 
