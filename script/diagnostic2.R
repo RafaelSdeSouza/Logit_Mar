@@ -13,8 +13,8 @@ data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
 
 data_cut_E   <- subset(data_cut, zoo == "E")
 mod1<- glm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut_E)
-WAIC<-WAIC(mod1)  
-WAIC0<-WAIC(glm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut_E))
+WAIC<-WAIC(mod1)$WAIC2  
+WAIC0<-WAIC(glm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut_E))$WAIC2
 
 # GoF Visual 
 binagem<-0.1
@@ -41,8 +41,8 @@ ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position 
                                   axis.title.x=element_text(vjust=-0.25),
                                   text = element_text(size=25))+xlab("Predicted  AGN fraction")+
   ylab("Observed AGN Fraction")+
-  annotate("text",color="#de2d26",size=5,label=paste("This model: WAIC = ",round(BIC,1),sep=""),x=0.65,y=0.2,hjust = 0)+
-  annotate("text",color="gray60",size=5,label=paste("Intercept only: WAIC = ",round(BIC0,1),sep=""),x=0.65,y=0.25,hjust = 0)+
+  annotate("text",color="#de2d26",size=5,label=paste("This model: WAIC = ",round(WAIC,1),sep=""),x=0.65,y=0.2,hjust = 0)+
+  annotate("text",color="gray60",size=5,label=paste("Intercept only: WAIC = ",round(WAIC0,1),sep=""),x=0.65,y=0.25,hjust = 0)+
   coord_cartesian(xlim=c(0.25,0.85),ylim=c(-0.1,1.1))
 
 
@@ -53,8 +53,8 @@ quartz.save(type = 'pdf', file = '..//figures/GoF_E.pdf',width = 9, height = 8)
 
 data_cut_S   <- subset(data_cut, zoo == "S")
 mod2<- glm(bpt ~ logM200_L+RprojLW_Rvir, family=binomial(link = "logit"),data=data_cut_S)
-WAIC<-WAIC(mod2)  
-WAIC0<-WAIC(glm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut_S))
+WAIC<-WAIC(mod2)$WAIC2  
+WAIC0<-WAIC(glm(bpt ~ 1, family=binomial(link = "logit"),data=data_cut_S))$WAIC2 
 
 # GoF Visual 
 binagem2<-0.005
@@ -80,8 +80,8 @@ ggplot(aes(x=fit,y=obs),data=gdata)+geom_point(colour="#00CED1",size=3,position 
                    axis.title.x=element_text(vjust=-0.25),
                    text = element_text(size=25))+xlab("Predicted  AGN fraction")+
   ylab("Observed AGN Fraction")+
-  annotate("text",color="#de2d26",size=5,label=paste("This model: WAIC = ",round(BIC,1),sep=""),x=0.505,y=0.2,hjust = 0)+
-  annotate("text",color="gray60",size=5,label=paste("Intercept only: WAIC = ",round(BIC0,1),sep=""),x=0.505,y=0.25,hjust = 0)+
+  annotate("text",color="gray60",size=5,label=paste("This model: WAIC = ",round(WAIC,1),sep=""),x=0.505,y=0.2,hjust = 0)+
+  annotate("text",color="#de2d26",size=5,label=paste("Intercept only: WAIC = ",round(WAIC0,1),sep=""),x=0.505,y=0.25,hjust = 0)+
   coord_cartesian(xlim=c(0.479,0.519),ylim=c(-0.1,1.1))
 
 
