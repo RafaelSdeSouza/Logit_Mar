@@ -140,8 +140,9 @@ quartz.save(type = 'pdf', file = '..//figures/RMgal.pdf',width = 9.5, height = 9
 
 
 
+ggplot(gdata,aes(y=value,x=PSM,fill=zoo,linetype=PSM))+geom_boxplot(alpha=0.5)+facet_wrap(zoo~variable,scale="free")
 
-ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values=c("#00CED1","#00CED1","#00CED1","#00CED1"))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values=c("#fcbba1","#a6bddb","#de2d26","#00CED1"))
 unlockBinding("ggplot",parent.env(asNamespace("GGally")))
 assign("ggplot",ggplot,parent.env(asNamespace("GGally")))
 require(GGally)
@@ -150,7 +151,6 @@ gp<-ggpairs(
   upper = list(continuous = "density", combo = "box"),
   lower = list(continuous = "points", combo = "dot"),
   color = "color ",
-  alpha=0.7,
    title = ""
 )
 
