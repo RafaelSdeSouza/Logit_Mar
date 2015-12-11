@@ -32,7 +32,9 @@ data2    <- data2[which(data2$sfr_tot_p50>=-100),]
 
 # Standardized variables
 
-data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
+#data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
+
+data2<-data.frame(bpt=data2$bpt,data2[,2:6],zoo=data2$zoo)
 
 #trainIndex <- sample(1:nrow(data2),nrow(data2))
 data3      <- data2
@@ -52,7 +54,7 @@ data_n     <- data3
 #data_n2$zoo<-droplevels(data_n2$zoo)
 
 
-data_n2    <- subset(data_n, zoo == "E")
+data_n2    <- subset(data_n, zoo == "S")
 data_n2$zoo<-droplevels(data_n2$zoo)
 
 #m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")], method = 	"nearest", distance = "logit")
@@ -61,7 +63,7 @@ m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data
 
 matched <- match.data(m.out)
 
-write.matrix(matched,"..//data/matched_E.txt",sep=" ")
+write.matrix(matched,"..//data/matched_S_original.txt",sep=" ")
 
 
 
