@@ -58,9 +58,9 @@ Full_data<-rbind(dataraw,datam)
 
 
 Full_data$type<-as.factor(Full_data$type)
-ggplot(Full_data,aes(y=lgm_tot_p50,x=sfr_tot_p50,color=type,linetype=type,shape=PSM))+geom_point(size=1.05,alpba=0.6)+
-  geom_density2d(size=0.95,n = 200,aes(alpha=0.95))+
-   scale_color_manual(name="",values=c("red2","salmon2", "royalblue3","cyan4"))+
+ggplot(Full_data,aes(y=lgm_tot_p50,x=sfr_tot_p50,color=type,linetype=type))+geom_point(size=0.75,alpba=0.1,shape=3)+
+  geom_density2d(size=1.5)+
+   scale_color_manual(name="",values=c("red","lightgoldenrod3", "royalblue3","green4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
   theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
@@ -78,7 +78,7 @@ quartz.save(type = 'pdf', file = '..//figures/MgalSFR.pdf',width = 9.5, height =
 
 
 ggplot(Full_data,aes(y=color_gr,x=sfr_tot_p50,color=type,linetype=type,shape=PSM))+geom_point(size=1.05,alpba=0.7)+
-  geom_density2d(size=0.95,n = 200,aes(alpha=0.95))+
+  geom_density2d(size=1.5)+
   scale_color_manual(name="",values=c("red2","salmon2", "royalblue3","cyan4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
   theme_bw()+
@@ -98,7 +98,7 @@ quartz.save(type = 'pdf', file = '..//figures/grSFR.pdf',width = 9.5, height = 9
 
 ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=type,shape=PSM))+
   #geom_point(size=1.05,alpba=0.7)+
-  geom_density2d(size=0.95,n = 200,aes(alpha=0.95))+
+  geom_density2d(size=1.5)+
   scale_color_manual(name="",values=c("red2","salmon2", "royalblue3","cyan4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
   theme_bw()+
@@ -120,13 +120,13 @@ quartz.save(type = 'pdf', file = '..//figures/grMgal.pdf',width = 9.5, height = 
 datag<-rbind(dataE,dataS)
 
 datag2<-subset(datag,type=="E_cut" | type =="S_cut")
-
-ggplot(datag2,aes(y=lgm_tot_p50,x=RprojLW_Rvir,linetype=type,color=type,shape=type))+
-  geom_point(size=2.25,alpba=0.8)+
-  geom_density2d(n = 200,size=1.25)+
-  scale_color_manual(name="",values=c("red3", "royalblue3"))+
+datag2$bpt<-as.factor(datag2$bpt)
+ggplot(datag2,aes(y=lgm_tot_p50,x=RprojLW_Rvir,linetype=type,color=type))+
+ geom_point(size=2.25,alpba=0.8,aes(shape=bpt))+
+  geom_density2d(size=1.5)+
+  scale_color_manual(name="",values=c("orangered2", "cyan4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed"))+
-  scale_shape_cleveland()+
+  scale_shape_manual(values=c(1,19))+
   theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
