@@ -75,7 +75,9 @@
 	av_MILES		- Internal extinction Av obtained using the STARLIGHT code with MILES models 
 
 	logMass_BC03		- log(stellar mass) obtained using the STARLIGHT code with BC03 models
-
+##################################
+# Table sample_CRP02_sub.csv
+##################################
 	ageM_BC03		- Mass-weighted age obtained using the STARLIGHT code with BC03 models (Gyr)
 
 	metM_BC03		- Mass-weighted metallicity obtained using the STARLIGHT code with BC03 models
@@ -97,7 +99,9 @@
 	absPetro_g		- Petrosian absolute magnitude in g band (extinction and k-corrected)
 
 	absPetro_r		- Petrosian absolute magnitude in r band (extinction and k-corrected)
-
+##################################
+# Table sample_CRP02_sub.csv
+##################################
 	absPetro_i		- Petrosian absolute magnitude in i band (extinction and k-corrected)
 
 	igal			- Galaxy ID (Yang et al. catalogue)
@@ -153,6 +157,29 @@
 	RprojLW_Rvir		- projected distance of galaxy from luminosity weighted group center, normalized by Rvir
 
 	RprojM_Rvir		- projected distance of galaxy from most massive group galaxy, normalized by Rvir
+
+
+##################################
+# 14/12/2015
+##################################
+
+Emission line fluxes added to the table. See Cid Fernandes+2010, MNRAS, 403, 1036 for details on alternative diagnostic diagrams.
+
+SELECT
+  m.objid,
+  l.oii_3726_flux, l.oii_3729_flux, l.oiii_5007_flux,
+  l.nii_6584_flux, l.sii_6717_flux, l.sii_6731_flux,
+  l.h_alpha_flux, l.h_beta_flux
+  
+INTO
+  myDB.AGN_flux
+  
+FROM
+  myDB.AGN as m, SpecObj as s, galSpecLine as l
+  
+WHERE
+  m.objid = s.bestobjid AND
+  s.specObjID = l.specObjID
 
 
 
