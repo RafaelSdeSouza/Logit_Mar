@@ -124,7 +124,7 @@ datag<-rbind(dataE,dataS)
 datag2<-subset(datag,type=="E_cut" | type =="S_cut")
 datag2$bpt<-as.factor(datag2$bpt)
 ggplot(datag2,aes(y=lgm_tot_p50,x=RprojLW_Rvir,linetype=type,color=type))+
- geom_point(size=1.25,alpha=0.8,aes(shape=bpt))+
+ geom_point(size=2,alpha=0.8,aes(shape=bpt))+
   geom_density2d(size=1.5)+
   scale_color_manual(name="",values=c("red3", "cyan4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed"))+
@@ -139,6 +139,25 @@ ggplot(datag2,aes(y=lgm_tot_p50,x=RprojLW_Rvir,linetype=type,color=type))+
 ylab(expression(log~M["*"]~(M['\u0298'])))+xlab(expression(R/R[vir]))+
   coord_cartesian(ylim=c(10,12))
 quartz.save(type = 'pdf', file = '..//figures/RMgal.pdf',width = 9.5, height = 9)
+
+
+dat_melt0<-datag2[,c("logM200_L","RprojLW_Rvir","type","bpt")]
+dat_melt1<-melt(dat_melt0,id=c("type","bpt"))
+ggplot(dat_melt1,aes(x=value,linetype=type,fill=type,shape=type))+
+  geom_histogram(size=2.25,alpba=0.8,binwidth=0.25)+
+  scale_fill_manual(name="",values=c("red3", "royalblue3"))+
+  scale_linetype_manual(name="",values=c("solid", "dashed"))+
+  theme_bw()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
+        axis.text.y=element_text(size=20),
+        strip.text.x=element_text(size=20),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
+  facet_wrap(variable~type,scales="free")
+  
+  ylab(expression(log~M["*"]~(M['\u0298'])))+xlab(expression(R/R[vir]))+
+
 
 
 
