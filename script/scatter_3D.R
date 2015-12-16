@@ -124,7 +124,7 @@ datag<-rbind(dataE,dataS)
 datag2<-subset(datag,type=="E_cut" | type =="S_cut")
 datag2$bpt<-as.factor(datag2$bpt)
 ggplot(datag2,aes(y=lgm_tot_p50,x=RprojLW_Rvir,linetype=type,color=type))+
- geom_point(size=1.25,alpha=0.8,aes(shape=bpt))+
+ geom_point(size=2,alpha=0.8,aes(shape=bpt))+
   geom_density2d(size=1.5)+
   scale_color_manual(name="",values=c("red3", "cyan4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed"))+
