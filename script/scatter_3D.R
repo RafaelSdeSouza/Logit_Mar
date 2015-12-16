@@ -144,7 +144,8 @@ quartz.save(type = 'pdf', file = '..//figures/RMgal.pdf',width = 9.5, height = 9
 dat_melt0<-datag2[,c("logM200_L","RprojLW_Rvir","type","bpt")]
 dat_melt1<-melt(dat_melt0,id=c("type","bpt"))
 ggplot(dat_melt1,aes(x=value,linetype=type,fill=type,shape=type))+
-  geom_histogram(size=2.25,alpba=0.8,binwidth=0.25)+
+  stat_ecdf()+
+#  geom_histogram(size=2.25,alpba=0.8,binwidth=0.25)+
   scale_fill_manual(name="",values=c("red3", "royalblue3"))+
   scale_linetype_manual(name="",values=c("solid", "dashed"))+
   theme_bw()+

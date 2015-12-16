@@ -12,6 +12,7 @@ data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
 
 
+
 X          <- model.matrix( ~  logM200_L + RprojLW_Rvir, data = data_cut) # Predictors
 K          <- ncol(X)                   # Number of Predictors including the intercept 
 y          <- data_cut$bpt # Response variable (0/1)
