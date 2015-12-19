@@ -34,7 +34,7 @@ data2    <- data2[which(data2$sfr_tot_p50>=-100),]
 
 #data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,2:6])),zoo=data2$zoo)
 
-data2<-data.frame(bpt=data2$bpt,data2[,2:6],zoo=data2$zoo)
+#data2<-data.frame(bpt=data2$bpt,data2[,2:6],zoo=data2$zoo)
 
 #trainIndex <- sample(1:nrow(data2),nrow(data2))
 data3      <- data2

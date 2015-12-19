@@ -5,6 +5,36 @@ require(ggthemes)
 require(Cairo)
 require(plyr)
 
+
+
+# Prepare points ------------------------------------------------------------------------
+dataE     <- read.table("..//data/matched_E_original.txt",header=TRUE,na.strings="")
+dataS     <- read.table("..//data/matched_S_original.txt",header=TRUE,na.strings="")
+t.breaks <-cut(dataE$RprojLW_Rvir, breaks=c(0,1.5,3,4.5,6,8))
+means <-tapply(dataE$bpt, t.breaks, mean)
+semean <-function(x) sd(x)/sqrt(length(x))
+means.se <-tapply(dataE$bpt, t.breaks, semean)
+bins<-levels(t.breaks)
+
+
+gdata<-data.frame(x=bins,y=means)
+gdata$gal<-rep("E",nrow(gdata))
+
+
+t.breaks2 <-cut(dataS$RprojLW_Rvir, breaks=c(0,1.5,3,4.5,6,8))
+means2 <-tapply(dataS$bpt, t.breaks2, mean)
+semean2 <-function(x) sd(x)/sqrt(length(x))
+means.se2 <-tapply(dataS$bpt, t.breaks2, semean2)
+
+gdata2<-data.frame(x=bins,y=means2)
+gdata2$gal<-rep("S",nrow(gdata2))
+
+gdata$xc<-c(0.75,2.25,3.75,5.25,7)
+gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
+
+##------------------------------------------------------------------
+
+
 gMx_S<-read.table("..//data/gMx_S.dat",header=TRUE)
 gMx_E<-read.table("..//data/gMx_E.dat",header=TRUE)
 #gMx_E$x<-gMx_S$x
@@ -60,6 +90,12 @@ quartz.save(type = 'pdf', file = '..//figures/P_Mx.pdf',width = 9.5, height = 9)
   geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr2, ymax=upr2),alpha=0.6,  fill=c("#E0FFFF")) +
   geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.5,  fill=c("#00CED1")) +
   geom_line(size=1,linetype="dashed")+
+    geom_point(aes(x=xc,y=y),size=3,data=gdata,colour="red3")+
+    geom_errorbar(data=gdata,guide="none",aes(x=xc,y=y,ymin=y-2*means.se,ymax=y+2*means.se),
+                  colour="red3",width=0.05)+
+    geom_point(aes(x=xc,y=y),size=3,data=gdata2,colour="cyan3")+
+    geom_errorbar(data=gdata2,guide="none",aes(x=xc,y=y,ymin=y-2*means.se,ymax=y+2*means.se),
+                  colour="cyan3",width=0.05)+
    theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
@@ -67,9 +103,13 @@ quartz.save(type = 'pdf', file = '..//figures/P_Mx.pdf',width = 9.5, height = 9)
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.15,0.85))
+  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.15,1))
 #+coord_cartesian(xlim=c(0,10))
 
+  
+
+    
+    
 quartz.save(type = 'pdf', file = '..//figures/P_Rx.pdf',width = 9.5, height = 9)
 #CairoPDF("..//figures/P_Rx.pdf",width = 9.25, height = 9)
 #PRx
