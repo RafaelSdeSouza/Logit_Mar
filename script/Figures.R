@@ -10,9 +10,16 @@ require(plyr)
 # Prepare points ------------------------------------------------------------------------
 dataE     <- read.table("..//data/matched_E_original.txt",header=TRUE,na.strings="")
 dataS     <- read.table("..//data/matched_S_original.txt",header=TRUE,na.strings="")
+
+Mmean <-mean(dataE$logM200_L)
+Msd <-sd(dataE$logM200_L)
+#dataE<-dataE[which(dataE$logM200_L<=Mmean+Msd & dataE$logM200_L >= Mmean - Msd),]
+#dataS<-dataS[which(dataS$logM200_L<=Mmean+Msd & dataS$logM200_L >= Mmean - Msd),]
+
 t.breaks <-cut(dataE$RprojLW_Rvir, breaks=c(0,1.5,3,4.5,6,8))
 means <-tapply(dataE$bpt, t.breaks, mean)
 semean <-function(x) sd(x)/sqrt(length(x))
+#semean <-function(x) sqrt(x*(1-x)/length(x))
 means.se <-tapply(dataE$bpt, t.breaks, semean)
 bins<-levels(t.breaks)
 
@@ -24,6 +31,7 @@ gdata$gal<-rep("E",nrow(gdata))
 t.breaks2 <-cut(dataS$RprojLW_Rvir, breaks=c(0,1.5,3,4.5,6,8))
 means2 <-tapply(dataS$bpt, t.breaks2, mean)
 semean2 <-function(x) sd(x)/sqrt(length(x))
+#semean2 <-function(x) sqrt(x*(1-x)/length(x))
 means.se2 <-tapply(dataS$bpt, t.breaks2, semean2)
 
 gdata2<-data.frame(x=bins,y=means2)
@@ -103,8 +111,8 @@ quartz.save(type = 'pdf', file = '..//figures/P_Mx.pdf',width = 9.5, height = 9)
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.15,1))
-#+coord_cartesian(xlim=c(0,10))
+  xlab(expression(R/R[vir]))+ylab(expression(P[AGN]))+coord_cartesian(ylim=c(0.1,1))
+#  +coord_cartesian(xlim=c(0,10))
 
   
 
