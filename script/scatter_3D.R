@@ -98,10 +98,12 @@ quartz.save(type = 'pdf', file = '..//figures/grSFR.pdf',width = 9.5, height = 9
 
 
 
-ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=type,shape=PSM))+
-  geom_point(size=0.25,alpha=0.2,shape=3)+
+ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=type))+
+  geom_point(size=0.8,alpha=0.15)+
+#  scale_size_manual(name="",values=c(1,1,1,1))+
+#  scale_shape_manual(values=c(15,4))+
   geom_density2d(alpha=0.7,size=1)+
-  scale_color_manual(name="",values=c("red3","coral", "royalblue3","green4"))+
+  scale_color_manual(name="",values=c("red3","coral", "green4","cyan4"))+
   scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
   theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
@@ -110,11 +112,24 @@ ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=type,shape=PSM
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  coord_cartesian(ylim=c(0,1.5),xlim=c(9,12))+xlab(expression(log~M["*"]~(M['\u0298'])))+ylab("g-r")
+  coord_cartesian(ylim=c(0,1.5),xlim=c(9,12))+xlab("Log (stellar mass)")+ylab("(g-r)")
 
 quartz.save(type = 'pdf', file = '..//figures/grMgal.pdf',width = 9.5, height = 9)
 
-
+ggplot(datam,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=zoo))+
+  geom_point(aes(alpha=0.25,shape=bpt,size=bpt))+
+  #  geom_density2d(alpha=0.7,size=1)+
+  scale_color_manual(name="",values=c("red2", "cyan4"))+
+  scale_size_manual(name="",values=c(2.5,4))+
+  #  scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
+  theme_bw()+
+  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
+        axis.text.y=element_text(size=25),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
+  coord_cartesian(ylim=c(0,1.25),xlim=c(9.5,12))+xlab("Log (stellar mass)")+ylab("(g-r)")
 
 
 # R proj and Mhalo
@@ -141,23 +156,49 @@ ylab(expression(log~M["*"]~(M['\u0298'])))+xlab(expression(R/R[vir]))+
 quartz.save(type = 'pdf', file = '..//figures/RMgal.pdf',width = 9.5, height = 9)
 
 
-dat_melt0<-datag2[,c("logM200_L","RprojLW_Rvir","type","bpt")]
-dat_melt1<-melt(dat_melt0,id=c("type","bpt"))
-ggplot(dat_melt1,aes(x=value,linetype=type,fill=type,shape=type))+
-  stat_ecdf()+
-#  geom_histogram(size=2.25,alpba=0.8,binwidth=0.25)+
-  scale_fill_manual(name="",values=c("red3", "royalblue3"))+
+
+
+dat_melt0<-datag2[,c("RprojLW_Rvir","zoo","bpt")]
+dat_melt1<-melt(dat_melt0,id=c("zoo","bpt"))
+
+
+sample1<-subset(dat_melt1,zoo=="E")[,"value"]
+sample2<-subset(dat_melt1,zoo=="S")[,"value"]
+cdf1 <- ecdf(sample1)
+cdf2 <- ecdf(sample2) 
+# find min and max statistics to draw line between points of greatest distance
+minMax <- seq(min(sample1, sample2), max(sample1, sample2), length.out=length(sample1)) 
+x0 <- minMax[which( abs(cdf1(minMax) - cdf2(minMax)) == max(abs(cdf1(minMax) - cdf2(minMax))) )] 
+y0 <- cdf1(x0) 
+y1 <- cdf2(x0) 
+
+
+xE<-uniroot(function(x) cdf1(x)-0.95,lower = 0, upper = 10)$root
+xS<-uniroot(function(x) cdf2(x)-0.95,lower = 0, upper = 10)$root
+
+ggplot(dat_melt1,aes(x=value,linetype=zoo,color=zoo,fill=zoo,shape=zoo))+
+  stat_ecdf(size=1.5)+
+  #  geom_histogram(size=2.25,alpba=0.8,binwidth=0.25)+
+  scale_color_manual(name="",values=c("red3", "royalblue3"))+
   scale_linetype_manual(name="",values=c("solid", "dashed"))+
   theme_bw()+
-  theme(legend.position="none",plot.title = element_text(hjust=0.5),
+  theme(legend.position= "none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
         axis.text.y=element_text(size=20),
         strip.text.x=element_text(size=20),
         axis.title.x=element_text(vjust=-0.25),
-        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+
-  facet_wrap(variable~type,scales="free")
+        text = element_text(size=20),axis.title.x=element_text(size=rel(1)))+xlab(expression(R/R[vir]))+
+  ylab("Cumulative Fraction")+
+  geom_segment(aes(x = xE, y = 0, xend = xE, yend = 0.95),colour = "gray",linetype="dotted",size=0.75)+
+  geom_segment(aes(x = 0, y = 0.95, xend = xE, yend = 0.95),colour = "gray",linetype="dotted",size=0.75)+
   
-  ylab(expression(log~M["*"]~(M['\u0298'])))+xlab(expression(R/R[vir]))+
+  geom_segment(aes(x = xS, y = 0, xend = xS, yend = 0.95),colour = "gray",linetype="dotted",size=0.75)+
+  geom_segment(aes(x = 0, y =  0.95, xend = xS, yend = 0.95),colour = "gray",linetype="dotted",size=0.75)+
+  coord_cartesian(xlim=c(0.05,8),ylim=c(0.025,1))+
+  geom_point(x=xE,y=0.95,colour="red3",size=5)+
+  geom_point(x=xS,y=0.95,colour="royalblue3",size=5)
+quartz.save(type = 'pdf', file = '..//figures/CDF.pdf',width = 9.5, height = 9) 
+  
 
 
 
