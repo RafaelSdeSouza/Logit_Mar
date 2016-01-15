@@ -23,7 +23,7 @@ library(MatchIt);library(plyr);library(reshape2)
 
 # Read and format data
 data     <- read.csv("..//data/sample_CRP02_sub.csv",header=TRUE,na.strings="")
-data_cut <- data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo","groupID")]
+data_cut <- data[,c("bpt","lgm_tot_p50","logM200_L","RprojLW_Rvir","sfr_tot_p50","color_gr","zoo","groupID","igal")]
 data2    <- na.omit(data_cut)
 data2    <- data2[data2$lgm_tot_p50>0,]
 data2    <- data2[which(data2$logM200_L>0),]
@@ -35,7 +35,7 @@ data2    <- data2[which(data2$sfr_tot_p50>=-100),]
 #data2<-data.frame(bpt=data2$bpt,as.data.frame(scale(data2[,c("lgm_tot_p50","sfr_tot_p50","color_gr")])),zoo=data2$zoo,
 #                  RprojLW_Rvir=data2$RprojLW_Rvir,logM200_L=data2$logM200_L,groupID=data2$groupID)
 
-data2<-data.frame(bpt=data2$bpt,data2[,2:6],zoo=data2$zoo,groupID=data2$groupID)
+data2<-data.frame(bpt=data2$bpt,data2[,2:6],zoo=data2$zoo,groupID=data2$groupID,igal=data2$igal)
 
 #trainIndex <- sample(1:nrow(data2),nrow(data2))
 data3      <- data2
@@ -55,7 +55,7 @@ data_n     <- data3
 #data_n2$zoo<-droplevels(data_n2$zoo)
 
 
-data_n2    <- subset(data_n, zoo == "E")
+data_n2    <- subset(data_n, zoo == "S")
 data_n2$zoo<-droplevels(data_n2$zoo)
 
 #m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data_n2[,c("bpt" ,"lgm_tot_p50","sfr_tot_p50","color_gr")], method = 	"nearest", distance = "logit")
@@ -64,7 +64,7 @@ m.out <- matchit(formula = bpt ~ lgm_tot_p50 + sfr_tot_p50 + color_gr, data=data
 
 matched <- match.data(m.out)
 
-write.matrix(matched,"..//data/matched_E_original.txt",sep=" ")
+write.matrix(matched,"..//data/matched_S_original.txt",sep=" ")
 
 
 
