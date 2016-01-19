@@ -106,7 +106,7 @@ Ke = 0.61 / (xx - 0.47) + 1.19
 lines(xx, Ke, col = 'grey30', lwd = 3,lty = 4)
 
 xx = seq(-0.43, 5, 0.01)
-Sey = 1.01 * xx + 0.48
+Sey = 1.05 * xx + 0.45
 lines(xx, Sey, col = 'grey30', lwd = 3, lty = 2)
 
 #xx = seq(-4, 0.4, 0.01)
@@ -123,7 +123,7 @@ legend(-0.7, -1.2, 'Kauffmann+03', bty = 'n', text.col = 'grey30')
 legend(-1.15, 0.2, 'Star Forming', bty = 'n',cex = 1.2, text.col = 'deepskyblue3')
 legend(0.15, -1.2, 'Kewley+01', bty = 'n', text.col = 'grey30')
 legend(0.15, -0.25, 'Liner',cex = 1.2, bty = 'n', text.col = 'black')
-legend(0.15, 0.7, 'Kewley+06', bty = 'n', text.col = 'grey30')
+legend(0.075, 0.7, 'Schawinski+07', bty = 'n', text.col = 'grey30')
 legend(-0.8, 1, 'Seyfert', bty = 'n', cex = 1.2, text.col = 'orange3')
 legend(-0.28, -1.2, 'Composite', bty = 'n', cex = 1.2)
 par(font = 1)
@@ -163,7 +163,7 @@ Ke = 0.61 / (xx - 0.47) + 1.19
 lines(xx, Ke, col = 'grey30', lwd = 3,lty = 4)
 
 xx = seq(-0.43, 5, 0.01)
-Sey = 1.01 * xx + 0.48
+Sey = 1.05 * xx + 0.45
 lines(xx, Sey, col = 'grey30', lwd = 3, lty = 2)
 
 par(font = 2)
@@ -171,7 +171,7 @@ legend(-0.7, -1.2, 'Kauffmann+03', bty = 'n', text.col = 'grey30')
 legend(-1.15, 0.2, 'Star Forming', bty = 'n',cex = 1.2, text.col = 'deepskyblue3')
 legend(0.15, -1.2, 'Kewley+01', bty = 'n', text.col = 'grey30')
 legend(0.15, -0.25, 'Liner',cex = 1.2, bty = 'n', text.col = 'black')
-legend(0.15, 0.7, 'Kewley+06', bty = 'n', text.col = 'grey30')
+legend(0.075, 0.7, 'Schawinski+07', bty = 'n', text.col = 'grey30')
 legend(-0.8, 1, 'Seyfert', bty = 'n', cex = 1.2, text.col = 'orange3')
 legend(-0.28, -1.2, 'Composite', bty = 'n', cex = 1.2)
 par(font = 1)
