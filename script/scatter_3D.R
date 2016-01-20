@@ -98,13 +98,18 @@ quartz.save(type = 'pdf', file = '..//figures/grSFR.pdf',width = 9.5, height = 9
 
 
 
-ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=type))+
-  geom_point(size=0.8,alpha=0.15)+
+ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=PSM,group=PSM,colour=color_gr
+                     ))+
+ # geom_point(size=0.8,alpha=0.15,aes(colour=color_gr))+
 #  scale_size_manual(name="",values=c(1,1,1,1))+
 #  scale_shape_manual(values=c(15,4))+
-  geom_density2d(alpha=0.7,size=1)+
-  scale_color_manual(name="",values=c("red3","coral", "green4","cyan4"))+
-  scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
+  stat_density2d(aes(alpha=..level.., fill=..level..), size=1, 
+                 geom="polygon")+
+#  scale_color_manual(name="",values=c("red3","green4"))+
+#  scale_linetype_manual(name="",values=c("solid", "dashed","solid","dashed"))+
+  scale_linetype_stata()+
+  scale_color_gradient()+
+  scale_fill_continuous_tableau()+
   theme_bw()+
   theme(legend.position="none",plot.title = element_text(hjust=0.5),
         axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
@@ -112,7 +117,8 @@ ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,linetype=type,color=type))+
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  coord_cartesian(ylim=c(0,1.5),xlim=c(9,12))+xlab("Log (stellar mass)")+ylab("(g-r)")
+  coord_cartesian(ylim=c(0,1.5),xlim=c(9,12))+xlab("Log (stellar mass)")+ylab("(g-r)")+
+  facet_wrap(~zoo)
 
 quartz.save(type = 'pdf', file = '..//figures/grMgal.pdf',width = 9.5, height = 9)
 
