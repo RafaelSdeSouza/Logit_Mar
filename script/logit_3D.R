@@ -25,7 +25,7 @@ fit <- glm(z ~ Mhalo+x,family=binomial("logit"))
 
 
 
-visreg2d(fit, "y", "x", plot.type = "persp",scale = "response",col = "deepskyblue2",
+visreg2d(fit, "z", "x", plot.type = "persp",scale = "response",col = "deepskyblue2",
          xlab=expression(R/r200),ylab=expression(Mhalo),zlab="AGN fraction",theta=-25,ticktype="detailed",
          col="deepskyblue")
 
