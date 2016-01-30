@@ -48,7 +48,7 @@ zE <- xyE
 
 hist3D (x.binE[-1],y.binE[-1],z=zE,
         bty = "b2", phi = 30,  theta = -145,
-        xlab = "Mstar", ylab = "R/r200", zlab = "Number of galaxies",
+        xlab = "log Mstar", ylab = "R/r200", zlab = "Number of galaxies",
         col = ramp.col(col = c("plum2", "red3"),n = 50, alpha = 0.7), border = "gray", shade = 0.2,
         ticktype = "detailed", space = 0.15, d = 2, add = F,  colkey = list(length=0.45,dist=-0.075,shift=0.1),parse=T,along="y",
         ylim=c(0.2,7.75),xlim=c(10.1,12))
@@ -67,13 +67,13 @@ zS <- xyS
 
 hist3D (x.binS[-1],y.binS[-1],z=zS,
         bty = "b2", phi = 30,  theta = -145,
-        xlab = "Mstar", ylab = "R/r200", zlab = "Number of galaxies",
+        xlab = "log Mstar", ylab = "R/r200", zlab = "Number of galaxies",
          border = "gray", shade = 0.2,col=ramp.col(col = c("cyan2", "blue4"), n = 50, alpha = 0.7),
         ticktype = "detailed", space = 0.15, d = 2, add = F,  colkey = list(length=0.45,dist=-0.075,shift=0.1),
         parse=T,along="y",
         ylim=c(0.2,7.75),xlim=c(10.1,12))
 
-quartz.save(type = 'pdf', file = '..//figures/hist3D_S.pdf',width = 8.5, height = 9)
+quartz.save(type = 'pdf', file = '..//figures/hist3D_S.pdf',width = 12, height = 10)
 
 
 
