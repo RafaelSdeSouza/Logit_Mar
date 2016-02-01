@@ -116,7 +116,7 @@ ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,size=bpt,shape=bpt,linetype=PSM,gr
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  coord_cartesian(ylim=c(0.1,1.25),xlim=c(9.5,12))+xlab(expression(Log(M["*"])))+ylab("(g-r)")+
+  coord_cartesian(ylim=c(0.1,1.25),xlim=c(9.5,12))+xlab(expression(log~M["*"]))+ylab("(g-r)")+
   facet_wrap(~zoo)
 
 quartz.save(type = 'pdf', file = '..//figures/grMgal.pdf',width = 16, height = 8)
