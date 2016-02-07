@@ -5,6 +5,7 @@ require(ggthemes)
 require(Cairo)
 require(plyr)
 
+
 ##------------------------------------------------------------------
 #gMx_S<-read.table("..//data/gMx_S.dat",header=TRUE)
 #gMx_E<-read.table("..//data/gMx_E_minus.dat",header=TRUE)
@@ -60,7 +61,6 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
 
 
 
-
 #gRx_E$x<-gRx_S$x
 
 
@@ -77,7 +77,7 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
   geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.5,  fill=c("#00CED1")) +
   geom_line(size=1,linetype="dashed")+
     geom_point(aes(x=xc,y=y),size=4,data=gdata,colour="red3")+
-    geom_errorbar(data=gdata,aes(x=xc,y=y,ymin=y-2*means.se,ymax=y+2*means.se),
+    geom_errorbar(data=gdata,aes(x=xc,y=y,ymin=y-1.96*means.se,ymax=y+1.96*means.se),
                   colour="red3",width=0.05)+
     geom_point(aes(x=xc,y=y),size=4,data=gdata2,colour="cyan3")+
     geom_errorbar(data=gdata2,aes(x=xc,y=y,ymin=y-1.96*means.se2,ymax=y+1.96*means.se2),
@@ -93,10 +93,10 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
      annotate("text", x = 1, y = 0.9, label =paste("~","log~M[halo]%~~%14.0"),size = 10,parse=TRUE)
 #  +coord_cartesian(xlim=c(0,10))
 
-  
 
-    
-    
+
+
+
 quartz.save(type = 'pdf', file = '..//figures/P_Rx.pdf',width = 9.5, height = 9)
 #CairoPDF("..//figures/P_Rx.pdf",width = 9.25, height = 9)
 #PRx
