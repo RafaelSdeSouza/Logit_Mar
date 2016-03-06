@@ -86,6 +86,31 @@ ggplot(Full_data,aes(y=color_gr,x=lgm_tot_p50,size=bpt,shape=bpt,linetype=bpt,co
 quartz.save(type = 'pdf', file = '..//figures/grMgal.pdf',width = 16, height = 8)
 
 
+ggplot(Full_data,aes(y=color_gr,x=sfr_tot_p50,size=bpt,shape=bpt,linetype=bpt,colour=bpt
+))+
+  geom_point(alpha=0.9,aes(colour=bpt))+
+  scale_shape_manual(values=c(16,4))+
+  scale_color_manual(name="",values=c("orange2","gray"))+
+  stat_density2d( alpha=0.4,size=0.35,colour="black")+
+  
+  scale_size_manual(name="",values=c(2.5,0.75))+
+  
+  scale_linetype_manual(name="",values=c("solid","blank"))+
+  #  scale_linetype_stata()+
+  #  scale_color_gradient()+
+  theme_bw()+
+  theme(strip.background = element_rect(fill="white"),legend.position="none",plot.title = element_text(hjust=0.5),
+        axis.title.y=element_text(vjust=0.75),axis.text.x=element_text(size=25),
+        axis.text.y=element_text(size=25),
+        strip.text.x=element_text(size=25),
+        axis.title.x=element_text(vjust=-0.25),
+        text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
+  coord_cartesian(ylim=c(0.15,1.25),xlim=c(-3,1.5))+
+  xlab("log SFR")+ylab("g-r")+
+  facet_wrap(~zoo)
+quartz.save(type = 'pdf', file = '..//figures/grSFR.pdf',width = 16, height = 8)
+
+
 ggplot(Full_data,aes(x=color_gr))+
   geom_density(alpha=0.9)+
   xlab("g-r")+
