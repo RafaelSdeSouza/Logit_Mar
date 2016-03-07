@@ -89,7 +89,7 @@ axis(2, at = seq(-2, 2, 0.1), labels = F, tcl = -0.3)
 axis(4, at = seq(-2, 2, 0.5), labels = F, tcl = -0.6)
 axis(4, at = seq(-2, 2, 0.1), labels = F, tcl = -0.3)
 
-leg1 = expression(paste('SPIRALS'))
+leg1 = expression(paste('Spirals'))
 par(font = 2)
 legend(-1, 1.5, c(leg1), bty = 'n', pt.cex = c(cex1), pch = c(pch1), 
        col = c(col1), cex = 1.2)
@@ -148,7 +148,7 @@ axis(2, at = seq(-2, 2, 0.1), labels = F, tcl = -0.3)
 axis(4, at = seq(-2, 2, 0.5), labels = F, tcl = -0.6)
 axis(4, at = seq(-2, 2, 0.1), labels = F, tcl = -0.3)
 
-leg2 = expression(paste('ELLIPTICALS'))
+leg2 = expression(paste('Ellipticals'))
 par(font = 2)
 legend(-1, 1.5, c(leg2), bty = 'n', pt.cex = c(cex2), pch = c(pch2), 
        col = c(col2), cex = 1.2)

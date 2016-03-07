@@ -80,7 +80,8 @@ logit(pRxSplus[l])<-beta[1,2]+beta[3,2]*Rx[l]+beta[2,2]*(mean(X[,2])+sd(X[,2]))
 #logit(pxS[l])<-beta[1,2]+beta[2,2]*Mx[l]+beta[3,2]*Rx[l]
              }
              }"
-params <- c("beta","pi","pRxS","pRxSminus","pRxSplus","pRxE","pRxEminus","pRxEplus")        # Monitor these parameters.
+#params <- c("beta","pi","pRxS","pRxSminus","pRxSplus","pRxE","pRxEminus","pRxEplus")        # Monitor these parameters.
+params1 <- c("beta")   
 inits0  <- function () {list(beta = matrix(rnorm(6,0, 0.01),ncol=2))} # A function to generat initial values for mcmc
 inits1=inits0();inits2=inits0();inits3=inits0()         # Generate initial values for three chains
 
@@ -91,7 +92,7 @@ s      = 3*10^4 # Number of samples for each chain
 nc     = 3      # Number of mcmc
 th     = 10     # Thinning value
 jags.logit  <- run.jags(method="rjparallel",data = jags.data,inits = list(inits1,inits2,inits3),model=model,
-                       n.chains = nc,adapt=ad,monitor=c(params),burnin=bin,thin=th,sample=s,summarise=FALSE,plots=FALSE)
+                       n.chains = nc,adapt=ad,monitor=c(params1),burnin=bin,thin=th,sample=s,summarise=FALSE,plots=FALSE)
 
 
 
