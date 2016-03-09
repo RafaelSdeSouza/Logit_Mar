@@ -11,8 +11,9 @@ dataE     <- read.table("..//data/matched_E.txt",header=TRUE,na.strings="")
 dataS     <- read.table("..//data/matched_S.txt",header=TRUE,na.strings="")
 data<-rbind(dataE,dataS)
 data_cut <- data[,c("bpt","logM200_L","RprojLW_Rvir","zoo")]
+colnames(data_cut)<-c("AGN","logM200","r_r200","zoo")
 
-write.csv(data,"..//data/Seyfert.csv",row.names=F)
+write.csv(data_cut,"..//data/Seyfert.csv",row.names=F)
 
 
 X          <- model.matrix( ~  logM200_L + RprojLW_Rvir, data = data_cut) # Predictors
