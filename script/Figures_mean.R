@@ -89,8 +89,8 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(R/r[200]))+ylab(expression(f[Seyfert]))+coord_cartesian(ylim=c(0.1,1))+
-     annotate("text", x = 1, y = 0.9, label =paste("~","log~M[halo]%~~%14.0"),size = 10,parse=TRUE)
+  xlab(expression(r/r[200]))+ylab(expression(f[Seyfert]))+coord_cartesian(ylim=c(0.1,1))+
+     annotate("text", x = 1, y = 0.9, label =paste("~","log~M[200]%~~%14.0"),size = 10,parse=TRUE)
 #  +coord_cartesian(xlim=c(0,10))
 
 
@@ -186,7 +186,7 @@ quartz.save(type = 'pdf', file = '..//figures/P_Mx.pdf',width = 9.5, height = 9)
 
 
 #gplot<-rbind(gplot_S,gplot_E,deparse.level = 2)
-gplot<-read.table("gplot.dat",header=TRUE)
+gplot<-read.table("..//data/gplot.dat",header=TRUE)
 
 gplot$gal<-as.factor(gplot$gal)
 
@@ -194,7 +194,7 @@ gplot$Parameter<-revalue(gplot$Parameter, c("beta[1,1]"= "beta[1]","beta[1,2]"="
              "beta[3,2]"="beta[3]"))
 
 
-pL<-ggplot(data=gplot,aes(x=value,group=gal,fill=gal))+
+ggplot(data=gplot,aes(x=value,group=gal,fill=gal))+
   geom_density(colour="white",size=0.01,alpha=0.8)+facet_grid(Parameter~gal,labeller = label_parsed)+
   theme_bw()+
   theme(legend.position="none",panel.background = element_rect(fill = "white"),plot.background = element_rect(
@@ -209,7 +209,7 @@ pL<-ggplot(data=gplot,aes(x=value,group=gal,fill=gal))+
   geom_vline(xintercept=0,size=1,linetype="dashed",colour=c("grey50")) +
   #  scale_fill_manual(values=c("#E0FFFF","#00CED1","cyan4"))+
   scale_fill_manual(values=c("#de2d26","#00CED1"))+
-  ylab("Density")+xlab("Parameter value")
+  ylab("Posterior")+xlab("Parameter value")
 
 
 quartz.save(type = 'pdf', file = '..//figures/betas.pdf',width = 8.5, height = 9)

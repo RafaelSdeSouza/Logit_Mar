@@ -28,7 +28,7 @@ Rx <- seq(1.05*min(X[,3]),1.05*max(X[,3]),length.out=300)
 #jags.data  <- list(Y= y,N = n,X=X,b0 = rep(0,K),B0=diag(1e-4,K),Mx=Mx,
 #                   Rx=Rx,gal=gal)
 
-jags.data  <- list(Y= y,N = n,X=X,Mx=Mx,Rx=Rx,gal=gal)
+jags.data  <- list(Y= y,N = n,X=X,Rx=Rx,gal=gal)
 # b0 and B0 are the mean vector and the inverse of the covariance matrix of prior distribution of the regression coefficients
 
 ### Prior Specification and Likelihood function
@@ -38,6 +38,9 @@ model<-"model{
 tau ~ dgamma(0.001,0.001)
 mu  ~ dnorm(0,1e-3)
 
+
+
+
 #1. Priors
 
 #a.Normal 
@@ -46,6 +49,7 @@ for(k in 1:3){
 beta[k,j]~dnorm(mu,tau)                                    
 }
 }
+
 
 #2. Likelihood
 for(i in 1:N){
@@ -184,7 +188,7 @@ jagssamples <- as.mcmc.list(jags.logit)
 G1<-ggs(jagssamples,family="beta")
 gplot<-G1[,3:4]
 gplot$gal<-rep(c("E","S"),each=nrow(gplot)/2)
-write.table(gplot,"gplot.dat",row.names = F)
+write.table(gplot,"..//data/gplot.dat",row.names = F)
 
 
 

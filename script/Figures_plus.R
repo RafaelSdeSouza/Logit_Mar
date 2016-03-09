@@ -66,7 +66,7 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
 
 
 
-
+ymax<-c(0.5521079, 0.6206307, 0.7200667, 0.9382693, 0.99)
 #c) R_proj
 #PRx<-
   ggplot(aes(x=x_o,y=mean),data=gRx_S)+
@@ -77,7 +77,7 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
   geom_ribbon(data=gRx_S,aes(x=x_o,y=mean,ymin=lwr1, ymax=upr1),alpha=0.5,  fill=c("#00CED1")) +
   geom_line(size=1,linetype="dashed")+
     geom_point(aes(x=xc,y=y),size=4,data=gdata,colour="red3")+
-    geom_errorbar(data=gdata,aes(x=xc,y=y,ymin=y-2*means.se,ymax=y+2*means.se),
+    geom_errorbar(data=gdata,aes(x=xc,y=y,ymin=y-1.96*means.se,ymax=ymax),
                   colour="red3",width=0.05)+
     geom_point(aes(x=xc,y=y),size=4,data=gdata2,colour="cyan3")+
     geom_errorbar(data=gdata2,aes(x=xc,y=y,ymin=y-1.96*means.se2,ymax=y+1.96*means.se2),
@@ -89,8 +89,8 @@ gdata2$xc<-c(0.8,2.5,4,5.5,7.25)
         strip.text.x=element_text(size=25),
         axis.title.x=element_text(vjust=-0.25),
         text = element_text(size=25),axis.title.x=element_text(size=rel(1)))+
-  xlab(expression(R/r[200]))+ylab(expression(f[Seyfert]))+coord_cartesian(ylim=c(0.1,1))+
-     annotate("text", x = 1, y = 0.9, label =paste("~","log~M[halo]%~~%14.5"),size = 10,parse=TRUE)
+  xlab(expression(r/r[200]))+ylab(expression(f[Seyfert]))+coord_cartesian(ylim=c(0.1,1))+
+     annotate("text", x = 1, y = 0.9, label =paste("~","log~M[200]%~~%14.5"),size = 10,parse=TRUE)
 #  +coord_cartesian(xlim=c(0,10))
 
   
