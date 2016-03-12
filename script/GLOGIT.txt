@@ -1,14 +1,22 @@
 
     model{
-    # Priors
     # Diffuse normal priors betas
     for (i in 1:K) { beta[i] ~ dnorm(0, 0.0001)}
-
-    # Likelihood 
+    
+    #  Prior for theta  
+      sigma~dgamma(0.01,0.01)
+    
+    
     for (i in 1:N){  
-    Y[i] ~ dbin(p[i],m[i])
-    logit(p[i]) <-  eta[i]  
-    eta[i] <- inprod(beta[], X[i,])
+    Y[i] ~ dbetabin(sigma*pi[i],sigma*(1-pi[i]),m[i])
+#    Y[i] ~ dbin(p[i],m[i])
+#    p[i]~dbeta(shape1[i],shape2[i])
+#    shape1[i]<-sigma*pi[i]
+ #   shape2[i]<-sigma*(1-pi[i])
+    logit(pi[i]) <- eta[i]
+    eta[i]<-inprod(beta[],X[i,])
+    
+
     } 
     }
     
